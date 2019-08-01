@@ -268,7 +268,6 @@ export default {
         roleName,
         listQuery
       }
-      this.listLoading = true
       fetchList(data).then(response => {
         this.list = response.data.rows
         this.total = response.data.total

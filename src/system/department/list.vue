@@ -1,12 +1,12 @@
 <template>
   <div>
     <el-form :inline="true" class="demo-form-inline" align='center'>
-      <el-form-item label="角色" collapse-tags>
-        <el-input v-model="userName" placeholder="请填写角色"></el-input>
+      <el-form-item label="部门名称" collapse-tags>
+        <el-input v-model="search.dept" placeholder="请填写部门名称"></el-input>
       </el-form-item>
       <el-form-item label="创建时间">
         <el-date-picker
-          v-model="date"
+          v-model="time"
           type="datetimerange"
           range-separator="至"
           start-placeholder="开始日期"
@@ -15,7 +15,7 @@
         ></el-date-picker>
       </el-form-item>
       <el-button-group class="buttonGroup">
-        <el-button class="search" type="primary" icon="el-icon-search">搜索</el-button>
+        <el-button class="search" @click="handleSearch" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
         <el-button type="primary" v-hasPermission="'dept:add'" @click="handCreate" icon="el-icon-plus">添加</el-button>
         <el-button type="primary" icon="el-icon-download">导出excal</el-button>
@@ -87,7 +87,10 @@ export default {
   components: { treeTable, Pagination },
   data() {
     return {
-      date: '',
+      search: {
+        dept: ''    
+      },
+      time: '',
       tree: '',
       dialogFormVisible: false,
       dialogStatus: '',
@@ -98,13 +101,18 @@ export default {
       },
       columns: [
         {
-          text: '名称',
-          value: 'event',
+          text: '序号',
+          value: 'id',
+          width: 200
+        },
+        {
+          text: '部门名称',
+          value: 'title',
           width: 200
         },
         {
           text: '排序',
-          value: 'srot'
+          value: 'order'
         },
         {
           text: '创建时间',
@@ -112,7 +120,7 @@ export default {
         },
         {
           text: '修改时间',
-          value: 'updateTime'
+          value: 'modifyTime'
         }
       ],
       temp: {
@@ -129,13 +137,12 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        sort: '+id'
       }
     }
   },
   created() {
     this.getList()
-    this.treeRole()
+    // this.treeRole()
   },
   filters: {
     formatDate: function(value) {
@@ -155,10 +162,29 @@ export default {
     }
   },
   methods: {
+    formatTime(value) {
+      var d = new Date(value)
+      const resDate = d.getFullYear() + '-' + this.p((d.getMonth() + 1)) + '-' + this.p(d.getDate())
+      const resTime = this.p(d.getHours()) + ':' + this.p(d.getMinutes()) + ':' + this.p(d.getSeconds())
+      return resDate + ' ' + resTime
+    },
+    p(s) {
+      return s < 10 ? '0' + s : s
+    },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.content = response.data.items
+      var createTimeFrom
+      var createTimeTo
+      if (this.time === '') {
+        this.search.createTimeFrom = ''
+        this.search.createTimeTo = ''
+      } else {
+        this.search.createTimeFrom = this.formatTime(this.time[0])
+        this.search.createTimeTo = this.formatTime(this.time[1])
+      }
+      this.search.listQuery = this.listQuery
+      fetchList(this.search).then(response => {
+        this.content = response.data.rows.children
         this.total = response.data.total
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -170,8 +196,13 @@ export default {
     handleRefresh() {
       this.listQuery.page = 1
       this.getList()
-      this.date = ''
-      this.userName = ''
+      this.time = ''
+      this.search.dept = ''
+    },
+    // 搜索
+    handleSearch() {
+      this.listLoading = true
+      this.getList()
     },
     handleNodeClick(data) {
       console.log(data)

@@ -2,11 +2,11 @@
   <div>
     <el-form :inline="true" class="demo-form-inline">
       <el-form-item label="操作人" collapse-tags>
-        <el-input v-model="user" placeholder="请填写操作人"></el-input>
+        <el-input v-model="search.username" placeholder="请填写操作人"></el-input>
       </el-form-item>
       <el-form-item label="创建时间">
         <el-date-picker
-          v-model="date"
+          v-model="search.time"
           type="datetimerange"
           range-separator="至"
           start-placeholder="开始日期"
@@ -15,7 +15,7 @@
         ></el-date-picker>
       </el-form-item>
       <el-button-group class="buttonGroup">
-        <el-button class="search" type="primary" icon="el-icon-search">搜索</el-button>
+        <el-button class="search" @click="handleSearch" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
         <el-button type="primary" icon="el-icon-download">导出excal</el-button>
       </el-button-group>
@@ -33,32 +33,32 @@
       <el-table-column type="selection" width="55" align="center"></el-table-column>
       <el-table-column :label="$t('system.user')" prop="id" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.user }}</span>
+          <span>{{ scope.row.username }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('system.description')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.description }}</span>
+          <span>{{ scope.row.operation }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('system.timeConsuming')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.timeConsuming }}</span>
+          <span>{{ scope.row.time }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('system.methods')" sortable="custom" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.methods }}</span>
+          <span>{{ scope.row.method }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('system.parameter')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.parameter }}</span>
+          <span>{{ scope.row.params }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('system.IP')" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.IP }}</span>
+          <span>{{ scope.row.ip }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -80,12 +80,14 @@
   </div>
 </template>
 <script>
-import { fetchList, updateLog } from '@/api/log'
+import { fetchList, deleteLog } from '@/api/log'
 export default {
   data() {
     return {
-      user: '',
-      date: '',
+      search: {
+        username: '',
+        time: ''
+      },
       list: '',
       listLoading: true, // 加载动画
       // 分页
@@ -103,16 +105,38 @@ export default {
     // this.treeRole()
   },
   methods: {
+    formatTime(value) {
+      var d = new Date(value)
+      const resDate = d.getFullYear() + '-' + this.p((d.getMonth() + 1)) + '-' + this.p(d.getDate())
+      const resTime = this.p(d.getHours()) + ':' + this.p(d.getMinutes()) + ':' + this.p(d.getSeconds())
+      return resDate + ' ' + resTime
+    },
+    p(s) {
+      return s < 10 ? '0' + s : s
+    },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
+      this.listQuery = this.search.listQuery
+      if (this.search.time === '') {
+        this.search.createTimeFrom = ''
+        this.search.createTimeTo = ''
+      } else {
+        this.search.createTimeFrom = this.formatTime(this.search.time[0])
+        this.search.createTimeTo = this.formatTime(this.search.time[1])
+      }
+      console.log(this.search)
+      fetchList(this.search).then(response => {
+        // console.log(response.data)
+        this.list = response.data.rows
         this.total = response.data.total
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
       })
+    },
+    handleSearch() {
+      this.getList()
     },
     sortChange(data) {
       const { prop, order } = data
@@ -134,17 +158,15 @@ export default {
       row.status = status
     },
     handleDelete(row) {
-      console.log(this.list.indexOf(row))
-      updateLog(row).then(() => {
+      deleteLog(row.id).then(() => {
         this.$notify({
           title: '成功',
           message: '删除成功',
           type: 'success',
           duration: 2000
         })
+        this.getList()
       })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
     }
   }
 }
