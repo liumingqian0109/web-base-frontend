@@ -42,10 +42,10 @@
         style="width: 400px margin-left:50px"
       >
         <el-form-item :label="$t('menu.menuName')" prop="type">
-          <el-input v-model="temp.event" class="filter-item" placeholder="请填写菜单名"></el-input>
+          <el-input v-model="temp.title" class="filter-item" placeholder="请填写菜单名"></el-input>
         </el-form-item>
         <el-form-item :label="$t('menu.menuAddress')">
-          <el-input class="filter-item" v-model="temp.address" placeholder="请填写菜单地址"></el-input>
+          <el-input class="filter-item" v-model="temp.path" placeholder="请填写菜单地址"></el-input>
         </el-form-item>
         <el-form-item :label="$t('menu.menuName')">
           <el-input class="filter-item" v-model="temp.component" placeholder="请填写组件地址"></el-input>
@@ -56,10 +56,10 @@
           </el-input>
         </el-form-item>
         <el-form-item :label="$t('menu.menuRole')">
-          <el-input class="filter-item" v-model="temp.role" placeholder="请选择相关权限"></el-input>
+          <el-input class="filter-item" v-model="temp.permission" placeholder="请选择相关权限"></el-input>
         </el-form-item>
         <el-form-item :label="$t('menu.menuSorting')">
-          <el-input class="filter-item" v-model="temp.sort" placeholder="菜单排序"></el-input>
+          <el-input class="filter-item" v-model="temp.order" placeholder="菜单排序"></el-input>
         </el-form-item>
       </el-form>
       <!-- 添加窗口的树形结构 -->
@@ -105,28 +105,6 @@
       :limit.sync="listQuery.limit"
       @pagination="getList"
     />
-    <!-- <el-dialog
-      title="添加按钮"
-      :visible.sync="dialogVisibleBtn"
-      width="30%"
-      :before-close="handleClose">
-      <el-form
-        ref="dataForm"
-        label-position="left"
-        label-width="70px">
-        <el-form-item :label="$t('menu.BtnName')">
-          <el-input class="filter-item" v-model="temp.sort" placeholder="按钮名称"></el-input>
-        </el-form-item>
-        <el-form-item :label="$t('menu.BtnMenu')">
-          <el-input class="filter-item" v-model="temp.sort" placeholder="相关权限"></el-input>
-        </el-form-item>
-      </el-form>
-      <el-tree :data="tree" :props="props" show-checkbox></el-tree>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </span>
-    </el-dialog> -->
     <el-dialog
       class='IconDialog'
       title="选择菜单图标"
@@ -191,7 +169,7 @@ export default {
       columns: [
         {
           text: '名称',
-          value: 'event'
+          value: 'title'
         },
         {
           text: '图标',
@@ -203,7 +181,7 @@ export default {
         },
         {
           text: '地址',
-          value: 'address'
+          value: 'path'
         },
         {
           text: 'VUE组件',
@@ -211,7 +189,7 @@ export default {
         },
         {
           text: '权限',
-          value: 'role'
+          value: 'permission'
         }
       ],
       content: Array,
@@ -238,12 +216,12 @@ export default {
       dialogPvVisible: false, // dialog确定开关
       pvData: [],
       temp: {
-        event: '',
-        address: '',
+        title: '',
+        path: '',
         component: '',
         icon: '',
-        role: '',
-        sort: ''
+        permission: '',
+        order: ''
       },
       tree: '',
       list: ''
@@ -257,8 +235,8 @@ export default {
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
-        this.content = response.data.items
-        // console.log(this.content)
+        console.log(response.data)
+        this.content = response.data.rows.children
         this.total = response.data.total
         // console.log(this.total)
         // Just to simulate the time of the request

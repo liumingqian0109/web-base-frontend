@@ -113,7 +113,6 @@
       check-on-click-node
       :props="props"
       show-checkbox
-      check-strictly
       current-node-key
       node-key="id"
       highlight-current
@@ -340,7 +339,7 @@ export default {
       console.log(keyArr)
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.temp.menuId = keyArr
+          this.temp.menuIds = keyArr
           createRole(this.temp).then(response => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
@@ -365,7 +364,7 @@ export default {
       const data = this.temp.roleId
       updateTree(data).then(response => {
         this.tree = response.data.rows.rows.children
-        this.treeKey = response.data.ids
+        this.treeKey = response.data.menuIds
         this.$refs.tree.setCheckedKeys(this.treeKey)
       })
     },
@@ -377,7 +376,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateRole(tempData).then(() => {
-            // console.log(tempData)
+            console.log(tempData)
             this.dialogFormVisible = false
             this.$notify({
               title: '成功',
@@ -402,8 +401,6 @@ export default {
         })
         this.getList()
       })
-      // const index = this.list.indexOf(row)
-      // this.list.splice(index, 1)
     },
     // handleCheckChange(data, checked, indeterminate) {
     //   console.log(data, checked, indeterminate)

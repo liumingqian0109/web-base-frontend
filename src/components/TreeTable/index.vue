@@ -40,12 +40,6 @@
             <i v-if="!scope.row._expanded" class="el-icon-plus"/>
             <i v-else class="el-icon-minus"/>
           </span>
-          <!-- <span
-            v-if="icon(index,scope.row)"
-            class="tree-ctrl"
-          >
-            <i class="el-icon-plus"></i>
-          </span> -->
           {{ scope.row[column.value] }}
         </template>
       </el-table-column>
