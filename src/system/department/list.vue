@@ -2,7 +2,7 @@
   <div>
     <el-form :inline="true" class="demo-form-inline" align='center'>
       <el-form-item label="部门名称" collapse-tags>
-        <el-input v-model="search.dept" placeholder="请填写部门名称"></el-input>
+        <el-input v-model="search.deptName" placeholder="请填写部门名称"></el-input>
       </el-form-item>
       <el-form-item label="创建时间">
         <el-date-picker
@@ -33,10 +33,10 @@
         style="width: 400px margin-left:50px"
       >
         <el-form-item :label="$t('department.departmentName')" prop="type">
-          <el-input v-model="temp.event" class="filter-item" placeholder="请填写部门名称"></el-input>
+          <el-input v-model="temp.deptName" class="filter-item" placeholder="请填写部门名称"></el-input>
         </el-form-item>
         <el-form-item :label="$t('department.departmentSort')">
-          <el-input class="filter-item" v-model="temp.srot" placeholder="请填写部门排序"></el-input>
+          <el-input class="filter-item" v-model="temp.orderNum" placeholder="请填写部门排序"></el-input>
         </el-form-item>
       </el-form>
       <el-tree
@@ -88,7 +88,7 @@ export default {
   data() {
     return {
       search: {
-        dept: ''    
+        deptName: ''    
       },
       time: '',
       tree: '',
@@ -124,11 +124,11 @@ export default {
         }
       ],
       temp: {
-        event: '',
-        srot: ''
+        deptName: '',
+        orderNum: ''
       },
       props: {
-        label: 'label',
+        label: 'title',
         children: 'children'
       },
       content: Array,
@@ -173,8 +173,6 @@ export default {
     },
     getList() {
       this.listLoading = true
-      var createTimeFrom
-      var createTimeTo
       if (this.time === '') {
         this.search.createTimeFrom = ''
         this.search.createTimeTo = ''
@@ -183,7 +181,9 @@ export default {
         this.search.createTimeTo = this.formatTime(this.time[1])
       }
       this.search.listQuery = this.listQuery
+      console.log(this.search)
       fetchList(this.search).then(response => {
+        // console.log(response.data.rows.children)
         this.content = response.data.rows.children
         this.total = response.data.total
         // Just to simulate the time of the request
@@ -208,8 +208,8 @@ export default {
       console.log(data)
     },
     treeRole() {
-      treeList().then(response => {
-        this.tree = response.data.treeRole
+      fetchList().then(response => {
+        this.tree = response.data.rows.children
       })
     },
     handCreate() {
@@ -219,18 +219,16 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
+      this.treeRole()
     },
     createData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          this.temp.tree = this.tree
-          this.temp.pId = this.$refs.tree.getCheckedKeys()
+          // this.temp.tree = this.tree
+          const menuId = this.$refs.tree.getCheckedKeys()
+          this.temp.parentId = menuId[0]
           const tempData = Object.assign({}, this.temp)
-          createDepartment(tempData).then(() => {
-            // console.log(this.temp)
-            if (tempData.pId.length > 1) {
+          if (menuId.length > 1) {
               this.$notify({
                 title: '失败',
                 message: '最多只能选择一个上级部门,请修改',
@@ -238,15 +236,18 @@ export default {
               })
               return
             } else {
-              this.$notify({
-                title: '成功',
-                message: '创建成功',
-                type: 'success',
-                duration: 2000
+              createDepartment(tempData).then(() => {
+            // console.log(this.temp)
+                this.$notify({
+                    title: '成功',
+                    message: '创建成功',
+                    type: 'success',
+                    duration: 2000
+                  })
+                  this.dialogFormVisible = false
+                  this.getList()
               })
-              this.dialogFormVisible = false
             }
-          })
         }
       })
     },

@@ -9,7 +9,7 @@ export function fetchList(query) {
 }
 export function createDepartment(data) {
   return request({
-    url: '/department/create',
+    url: '/dept',
     method: 'post',
     data
   })
@@ -21,3 +21,10 @@ export function updateDepartment(data) {
     data
   })
 }
+// export function treeList(data) {
+//   return request({
+//     url: '/department/update',
+//     method: 'post',
+//     data
+//   })
+// }

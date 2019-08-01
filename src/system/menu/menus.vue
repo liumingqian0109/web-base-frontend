@@ -14,19 +14,9 @@
           align="right"
         ></el-date-picker>
       </el-form-item>
-      <el-popover
-        placement="top"
-        width="160"
-        v-model="visible">
-        <p>请选择创建类型</p>
-        <div style="text-align: right; margin: 0">
-          <el-button size="primary" type="mini" @click="handCreate">菜单</el-button>
-          <!-- <el-button type="primary" size="mini" @click="dialogVisibleBtn = true">按钮</el-button> -->
-        </div>
-        <el-button v-hasPermission="'menu:add'" type="primary" icon="el-icon-plus" slot="reference">添加</el-button>
-      </el-popover>
       <el-button-group class="buttonGroup">
         <el-button class="search" type="primary" icon="el-icon-search">搜索</el-button>
+        <el-button @click="handCreate" v-hasPermission="'menu:add'" type="primary" icon="el-icon-plus">添加</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
         <el-button type="primary" icon="el-icon-download">导出excal</el-button>
       </el-button-group>
@@ -47,7 +37,7 @@
         <el-form-item :label="$t('menu.menuAddress')">
           <el-input class="filter-item" v-model="temp.path" placeholder="请填写菜单地址"></el-input>
         </el-form-item>
-        <el-form-item :label="$t('menu.menuName')">
+        <el-form-item :label="$t('menu.menuComponent')">
           <el-input class="filter-item" v-model="temp.component" placeholder="请填写组件地址"></el-input>
         </el-form-item>
         <el-form-item :label="$t('menu.menuImg')">
@@ -161,7 +151,6 @@ export default {
   },
   data() {
     return {
-      visible: false,
       userName: '',
       treeKey: [],
       date: '',
@@ -257,7 +246,6 @@ export default {
     handCreate() {
       this.resetTemp()
       this.treeRole()
-      this.visible = false
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
