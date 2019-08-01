@@ -23,7 +23,7 @@
           <el-button size="primary" type="mini" @click="handCreate">菜单</el-button>
           <!-- <el-button type="primary" size="mini" @click="dialogVisibleBtn = true">按钮</el-button> -->
         </div>
-        <el-button type="primary" icon="el-icon-plus" slot="reference">添加</el-button>
+        <el-button v-hasPermission="'menu:add'" type="primary" icon="el-icon-plus" slot="reference">添加</el-button>
       </el-popover>
       <el-button-group class="buttonGroup">
         <el-button class="search" type="primary" icon="el-icon-search">搜索</el-button>
@@ -126,9 +126,7 @@
   Created: 2018/1/19-14:54
 */
 import Icons from './icon'
-import { fetchList, updateMenu, createMenu } from '@/api/menu'
-// 添加窗口tree
-import { treeList } from '@/api/role'
+import { fetchList, updateMenu, createMenu, treeList, updateTree } from '@/api/menu'
 // table tree
 import treeTable from '@/components/TreeTable'
 import Pagination from '@/components/Pagination'
@@ -165,6 +163,7 @@ export default {
     return {
       visible: false,
       userName: '',
+      treeKey: [],
       date: '',
       columns: [
         {
@@ -202,7 +201,7 @@ export default {
         sort: '+id'
       },
       props: {
-        label: 'label',
+        label: 'title',
         children: 'children'
       },
       dialogStatus: '',
@@ -247,16 +246,17 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        event: '',
-        address: '',
+        title: '',
+        path: '',
         component: '',
         icon: '',
-        role: '',
-        sort: ''
+        permission: '',
+        order: ''
       }
     },
     handCreate() {
       this.resetTemp()
+      this.treeRole()
       this.visible = false
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
@@ -267,14 +267,11 @@ export default {
     createData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          this.temp.tree = this.tree
-          this.temp.pId = this.$refs.tree.getCheckedKeys()
+          this.temp.menuId = this.$refs.tree.getCheckedKeys()
           const tempData = Object.assign({}, this.temp)
           createMenu(tempData).then(() => {
-            // console.log(tempData)
-            if (tempData.pId.length > 1) {
+            console.log(tempData)
+            if (tempData.menuId.length > 1) {
               this.$notify({
                 title: '失败',
                 message: '最多只能选择一个上级部门,请修改',
@@ -289,6 +286,7 @@ export default {
                 duration: 2000
               })
               this.dialogFormVisible = false
+              this.getList()
             }
           })
         }
@@ -303,7 +301,7 @@ export default {
     },
     treeRole() {
       treeList().then(response => {
-        this.tree = response.data.treeRole
+        this.tree = response.data.rows.children
       })
     },
     handleDragStart(node, ev) {
@@ -326,11 +324,16 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      console.log(this.temp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
+      })
+      const data = this.temp.id
+      updateTree(data).then(response => {
+        this.tree = response.data.rows.rows.children
+        this.treeKey = response.data.menuIds
+        this.$refs.tree.setCheckedKeys(this.treeKey)
       })
     },
     updateData() {
@@ -344,7 +347,7 @@ export default {
             role: this.temp.role,
             sort: this.temp.sort,
             tree: this.tree,
-            pId: this.$refs.tree.getCheckedKeys()
+            menuId: this.$refs.tree.getCheckedKeys()
           }
           const tempData = Object.assign({}, this.temp)
           updateMenu(tempData).then(() => {

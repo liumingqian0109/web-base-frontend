@@ -9,7 +9,7 @@ export function fetchList(query) {
 }
 export function createMenu(data) {
   return request({
-    url: '/menu/create',
+    url: '/menu',
     method: 'post',
     data
   })
@@ -21,4 +21,17 @@ export function updateMenu(data) {
     data
   })
 }
-
+export function treeList() {
+  return request({
+    url: '/menu',
+    method: 'get'
+    // params: query
+  })
+}
+export function updateTree(data) {
+  return request({
+    url: '/role/roleMenu/' + data,
+    method: 'get',
+    data
+  })
+}

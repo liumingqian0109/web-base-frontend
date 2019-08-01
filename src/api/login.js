@@ -19,10 +19,10 @@ export function loginByUsername(username, password) {
 //     data
 //   })
 // }
-export function logout() {
+export function logout(data) {
   return request({
-    url: '/login/logout',
-    method: 'post'
+    url: '/logout/' + data,
+    method: 'get'
   })
 }
 

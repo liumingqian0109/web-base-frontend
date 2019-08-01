@@ -55,12 +55,14 @@
             <el-button
               type="primary"
               size="mini"
+              v-hasPermission="'menu:update'"
               @click="childMethod(scope.row)"
             >{{ $t('table.edit') }}</el-button>
             <el-button
               v-if="scope.row.status!='deleted'"
               size="mini"
               type="danger"
+              v-hasPermission="'menu:delete'"
               @click="handleModifyStatus(scope.row,'deleted')"
             >{{ $t('table.delete') }}</el-button>
           </template>

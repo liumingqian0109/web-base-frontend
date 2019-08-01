@@ -17,7 +17,8 @@ const user = {
       articlePlatform: []
     },
     username: '',
-    permissionsBtn: ''
+    permissionsBtn: '',
+    userId: ''
   },
 
   mutations: {
@@ -50,6 +51,9 @@ const user = {
     },
     SET_PERMISSIONBTN: (state, permissionsBtn) => {
       state.permissionsBtn = permissionsBtn
+    },
+    SET_USERID: (state, userId) => {
+      state.userId = userId
     }
   },
 
@@ -58,11 +62,9 @@ const user = {
     LoginByUsername({ commit }, userInfo) {
       const username = userInfo.username.trim()
       Cookies.set(usernameKey, username)
-      // console.log()
       return new Promise((resolve, reject) => {
         loginByUsername(username, userInfo.password).then(response => {
           const data = response.data.data
-          // console.log(data)
           commit('SET_TOKEN', data.token)
           setToken(data.token)
           resolve()
@@ -71,30 +73,12 @@ const user = {
         })
       })
     },
-    // LoginByUsername({ commit }, userInfo) {
-    //   const username = userInfo.username.trim()
-    //   Cookies.set(usernameKey, username)
-    //   // console.log()
-    //   return new Promise((resolve, reject) => {
-    //     loginByUsername(username, userInfo.password).then(response => {
-    //       const data = response.data
-    //       console.log(data)
-    //       commit('SET_TOKEN', data.token)
-    //       setToken(data.token)
-    //       resolve()
-    //     }).catch(error => {
-    //       reject(error)
-    //     })
-    //   })
-    // },
     // 获取用户信息
     GetUserInfo({ commit }) {
       const userName = Cookies.get(usernameKey)
-      // console.log(userName)
       return new Promise((resolve, reject) => {
         getUserInfo(userName).then(response => {
           // 由于mockjs 不支持自定义状态码只能这样hack
-          // console.log(response.data)
           if (!response.data) {
             reject('Verification failed, please login again.')
           }
@@ -102,16 +86,15 @@ const user = {
           if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
             commit('SET_ROLES', data.roles)
             commit('SET_USERNAME', data.user.username)
+            commit('SET_USERID', data.user.userId)
           } else {
             reject('getInfo: roles must be a non-null array!')
           }
 
           commit('SET_NAME', data.user.username)
-          // commit('SET_AVATAR', data.avatar)
           const avatar = 'src/assets/' + data.user.avatar
           const permissionsBtn = data.permissions
           console.log(permissionsBtn)
-          // console.log(avatar)
           commit('SET_AVATAR', avatar)
           commit('SET_INTRODUCTION', data.introduction)
           commit('SET_PERMISSIONBTN', permissionsBtn)
@@ -121,53 +104,12 @@ const user = {
         })
       })
     },
-    // GetUserInfo({ commit, state }) {
-    //   // const userName = Cookies.get(usernameKey)
-    //   // console.log(userName)
-    //   const token = state.token
-    //   return new Promise((resolve, reject) => {
-    //     getUserInfo(token).then(response => {
-    //       // 由于mockjs 不支持自定义状态码只能这样hack
-    //       // console.log(response.data)
-    //       if (!response.data) {
-    //         reject('Verification failed, please login again.')
-    //       }
-    //       const data = response.data
-    //       // console.log(data.user.username)
-    //       if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-    //         commit('SET_ROLES', data.roles)
-    //         commit('SET_USERNAME', data.user.username)
-    //       } else {
-    //         reject('getInfo: roles must be a non-null array!')
-    //       }
-
-    //       commit('SET_NAME', data.name)
-    //       commit('SET_AVATAR', data.avatar)
-    //       commit('SET_INTRODUCTION', data.introduction)
-    //       resolve(response)
-    //     }).catch(error => {
-    //       reject(error)
-    //     })
-    //   })
-    // },
-    // 第三方验证登录
-    // LoginByThirdparty({ commit, state }, code) {
-    //   return new Promise((resolve, reject) => {
-    //     commit('SET_CODE', code)
-    //     loginByThirdparty(state.status, state.email, state.code).then(response => {
-    //       commit('SET_TOKEN', response.data.token)
-    //       setToken(response.data.token)
-    //       resolve()
-    //     }).catch(error => {
-    //       reject(error)
-    //     })
-    //   })
-    // },
 
     // 登出
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {
-        logout(state.token).then(() => {
+        console.log(state.userId)
+        logout(state.userId).then(() => {
           commit('SET_TOKEN', '')
           commit('SET_ROLES', [])
           removeToken()

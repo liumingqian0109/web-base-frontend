@@ -339,7 +339,7 @@ export default {
       console.log(keyArr)
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.temp.menuIds = keyArr
+          this.temp.menuId = keyArr
           createRole(this.temp).then(response => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false

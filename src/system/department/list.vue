@@ -17,7 +17,7 @@
       <el-button-group class="buttonGroup">
         <el-button class="search" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
-        <el-button type="primary" @click="handCreate" icon="el-icon-plus">添加</el-button>
+        <el-button type="primary" v-hasPermission="'dept:add'" @click="handCreate" icon="el-icon-plus">添加</el-button>
         <el-button type="primary" icon="el-icon-download">导出excal</el-button>
       </el-button-group>
     </el-form>
@@ -180,21 +180,6 @@ export default {
       treeList().then(response => {
         this.tree = response.data.treeRole
       })
-    },
-    formatTime(value) {
-      var date = new Date(value)
-      var y = date.getFullYear()
-      let MM = date.getMonth() + 1
-      MM = MM < 10 ? ('0' + MM) : MM
-      let d = date.getDate()
-      d = d < 10 ? ('0' + d) : d
-      let h = date.getHours()
-      h = h < 10 ? ('0' + h) : h
-      let m = date.getMinutes()
-      m = m < 10 ? ('0' + m) : m
-      let s = date.getSeconds()
-      s = s < 10 ? ('0' + s) : s
-      return y + '-' + MM + '-' + d + ' ' + h + ':' + m + ':' + s
     },
     handCreate() {
       this.visible = false
