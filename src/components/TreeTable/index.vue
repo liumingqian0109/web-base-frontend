@@ -63,7 +63,7 @@
               size="mini"
               type="danger"
               v-hasPermission="'menu:delete'"
-              @click="handleModifyStatus(scope.row,'deleted')"
+              @click="childDelete(scope.row,'deleted')"
             >{{ $t('table.delete') }}</el-button>
           </template>
         </el-table-column>
@@ -138,6 +138,10 @@ export default {
     childMethod(row) {
       // console.log(row)
       this.$parent.handleUpdate(row)
+    },
+    childDelete(row) {
+      // console.log(row)
+      this.$parent.handleDelete(row)
     }
   }
 };

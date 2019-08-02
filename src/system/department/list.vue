@@ -33,10 +33,10 @@
         style="width: 400px margin-left:50px"
       >
         <el-form-item :label="$t('department.departmentName')" prop="type">
-          <el-input v-model="temp.deptName" class="filter-item" placeholder="请填写部门名称"></el-input>
+          <el-input v-model="temp.title" class="filter-item" placeholder="请填写部门名称"></el-input>
         </el-form-item>
         <el-form-item :label="$t('department.departmentSort')">
-          <el-input class="filter-item" v-model="temp.orderNum" placeholder="请填写部门排序"></el-input>
+          <el-input class="filter-item" v-model="temp.order" placeholder="请填写部门排序"></el-input>
         </el-form-item>
       </el-form>
       <el-tree
@@ -78,8 +78,7 @@
   Auth: Lei.j1ang
   Created: 2018/1/19-14:54
 */
-import { fetchList, updateDepartment, createDepartment } from '@/api/department'
-import { treeList } from '@/api/role'
+import { fetchList, updateDepartment, createDepartment, deleteDepartment } from '@/api/department'
 import treeTable from '@/components/TreeTable'
 import Pagination from '@/components/Pagination'
 export default {
@@ -88,7 +87,7 @@ export default {
   data() {
     return {
       search: {
-        deptName: ''    
+        deptName: ''
       },
       time: '',
       tree: '',
@@ -124,8 +123,8 @@ export default {
         }
       ],
       temp: {
-        deptName: '',
-        orderNum: ''
+        title: '',
+        order: ''
       },
       props: {
         label: 'title',
@@ -136,7 +135,7 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20,
+        limit: 20
       }
     }
   },
@@ -181,7 +180,7 @@ export default {
         this.search.createTimeTo = this.formatTime(this.time[1])
       }
       this.search.listQuery = this.listQuery
-      console.log(this.search)
+      // console.log(this.search)
       fetchList(this.search).then(response => {
         // console.log(response.data.rows.children)
         this.content = response.data.rows.children
@@ -226,68 +225,75 @@ export default {
         if (valid) {
           // this.temp.tree = this.tree
           const menuId = this.$refs.tree.getCheckedKeys()
-          this.temp.parentId = menuId[0]
-          const tempData = Object.assign({}, this.temp)
+          const temps = {
+            deptName: this.temp.title,
+            orderNum: this.temp.order,
+            parentId: menuId[0]
+          }
+          const tempData = Object.assign({}, temps)
           if (menuId.length > 1) {
-              this.$notify({
-                title: '失败',
-                message: '最多只能选择一个上级部门,请修改',
-                type: 'error'
-              })
-              return
-            } else {
-              createDepartment(tempData).then(() => {
+            this.$notify({
+              title: '失败',
+              message: '最多只能选择一个上级部门,请修改',
+              type: 'error'
+            })
+            return
+          } else {
+            createDepartment(tempData).then(() => {
             // console.log(this.temp)
-                this.$notify({
-                    title: '成功',
-                    message: '创建成功',
-                    type: 'success',
-                    duration: 2000
-                  })
-                  this.dialogFormVisible = false
-                  this.getList()
+              this.$notify({
+                title: '成功',
+                message: '创建成功',
+                type: 'success',
+                duration: 2000
               })
-            }
+              this.dialogFormVisible = false
+              this.getList()
+            })
+          }
         }
       })
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      // console.log(this.temp)
+      console.log(this.temp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
+      const treeKey = []
+      treeKey.push(this.temp.parentId)
+      // console.log(this.treeKey)
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
+      })
+      fetchList().then(response => {
+        this.tree = response.data.rows.children
+        this.$refs.tree.setCheckedKeys(treeKey)
       })
     },
     updateData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          const timestamp3 = new Date().getTime()
-          this.updateTime = this.formatTime(timestamp3)
+          const menuId = this.$refs.tree.getCheckedKeys()
           this.temp = {
-            id: this.temp.id,
-            event: this.temp.event,
-            srot: this.temp.srot,
-            createTime: this.temp.createTime,
-            updateTime: this.updateTime,
-            pId: this.$refs.tree.getCheckedKeys(),
-            tree: this.tree
+            deptName: this.temp.title,
+            orderNum: this.temp.order,
+            parentId: menuId[0],
+            deptIds: this.temp.id
           }
           const tempData = Object.assign({}, this.temp)
           // tempData.updateTime = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          // console.log(tempData)
-          updateDepartment(tempData).then(() => {
-            console.log(tempData)
-            if (tempData.pId.length > 1) {
-              this.$notify({
-                title: '失败',
-                message: '最多只能选择一个上级部门,请修改',
-                type: 'error',
-                duration: 2000
-              })
-              return
-            } else {
+          console.log(tempData)
+          if (tempData.parentId.length > 1) {
+            this.$notify({
+              title: '失败',
+              message: '最多只能选择一个上级部门,请修改',
+              type: 'error',
+              duration: 2000
+            })
+            return
+          } else {
+            updateDepartment(tempData).then(() => {
+              console.log(tempData)
               this.dialogFormVisible = false
               this.$notify({
                 title: '成功',
@@ -295,9 +301,23 @@ export default {
                 type: 'success',
                 duration: 2000
               })
-            }
-          })
+              this.getList()
+            })
+          }
         }
+      })
+    },
+    handleDelete(row) {
+      console.log(row)
+      const ids = row.id
+      deleteDepartment(ids).then(() => {
+        this.$notify({
+          title: '成功',
+          message: '删除成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
       })
     },
     // 树形结构拖曳

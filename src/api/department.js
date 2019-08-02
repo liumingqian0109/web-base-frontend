@@ -16,15 +16,14 @@ export function createDepartment(data) {
 }
 export function updateDepartment(data) {
   return request({
-    url: '/department/update',
-    method: 'post',
+    url: '/dept',
+    method: 'put',
     data
   })
 }
-// export function treeList(data) {
-//   return request({
-//     url: '/department/update',
-//     method: 'post',
-//     data
-//   })
-// }
+export function deleteDepartment(data) {
+  return request({
+    url: '/dept/' + data,
+    method: 'delete'
+  })
+}
