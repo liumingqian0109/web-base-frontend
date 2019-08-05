@@ -212,6 +212,12 @@ export default {
       })
     },
     handCreate() {
+      this.temp = {
+        title: '',
+        order: '',
+        parentId: ''
+      }
+      // this.tree = []
       this.visible = false
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
@@ -278,12 +284,12 @@ export default {
             deptName: this.temp.title,
             orderNum: this.temp.order,
             parentId: menuId[0],
-            deptIds: this.temp.id
+            deptId: this.temp.id
           }
           const tempData = Object.assign({}, this.temp)
           // tempData.updateTime = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           console.log(tempData)
-          if (tempData.parentId.length > 1) {
+          if (menuId.length > 1) {
             this.$notify({
               title: '失败',
               message: '最多只能选择一个上级部门,请修改',
@@ -308,16 +314,27 @@ export default {
       })
     },
     handleDelete(row) {
-      console.log(row)
-      const ids = row.id
-      deleteDepartment(ids).then(() => {
-        this.$notify({
-          title: '成功',
-          message: '删除成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.getList()
+      const deptIds = row.id
+      deleteDepartment(deptIds).then(response => {
+        console.log(response.data)
+        const state = response.data.state
+        const message = response.data.message
+        if (state === 1) {
+          this.$notify({
+            title: '成功',
+            message: message,
+            type: 'success',
+            duration: 2000
+          })
+          this.getList()
+        } else {
+          this.$notify({
+            title: '失败',
+            message: message,
+            type: 'error',
+            duration: 2000
+          })
+        }
       })
     },
     // 树形结构拖曳

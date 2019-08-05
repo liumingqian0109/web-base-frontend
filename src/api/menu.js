@@ -16,8 +16,8 @@ export function createMenu(data) {
 }
 export function updateMenu(data) {
   return request({
-    url: '/menu/update',
-    method: 'post',
+    url: '/menu',
+    method: 'put',
     data
   })
 }
@@ -32,6 +32,13 @@ export function updateTree(data) {
   return request({
     url: '/role/roleMenu/' + data,
     method: 'get',
+    data
+  })
+}
+export function deleteMenu(data) {
+  return request({
+    url: '/menu/' + data,
+    method: 'delete',
     data
   })
 }

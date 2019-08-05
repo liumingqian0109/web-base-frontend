@@ -84,19 +84,19 @@ export const constantRouterMap = [
       }
     ]
   },
-  {
-    path: '/icons',
-    component: Layout,
-    redirect: '/icons/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/icons/index'),
-        name: 'icons',
-        meta: { title: 'icons', icon: 'guide', noCache: true }
-      }
-    ]
-  },
+  // {
+  //   path: '/icons',
+  //   component: Layout,
+  //   redirect: '/icons/index',
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       component: () => import('@/views/icons/index'),
+  //       name: 'icons',
+  //       meta: { title: 'icons', icon: 'guide', noCache: true }
+  //     }
+  //   ]
+  // },
   {
     path: '/404',
     component: () => import('@/views/errorPage/404'),

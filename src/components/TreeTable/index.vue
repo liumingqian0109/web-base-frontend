@@ -62,7 +62,7 @@
               v-if="scope.row.status!='deleted'"
               size="mini"
               type="danger"
-              v-hasPermission="'menu:delete'"
+              v-hasPermission="'dept:delete'"
               @click="childDelete(scope.row,'deleted')"
             >{{ $t('table.delete') }}</el-button>
           </template>

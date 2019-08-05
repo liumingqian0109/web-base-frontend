@@ -186,8 +186,7 @@ export default {
       calendarTypeOptions,
       listQuery: {
         page: 1,
-        limit: 20,
-        sort: '+id'
+        limit: 20
       },
       props: {
         label: 'title',

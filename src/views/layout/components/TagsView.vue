@@ -40,6 +40,7 @@ export default {
   },
   computed: {
     visitedViews() {
+      // console.log(this.$store.state.menu.asyncRouterMap)
       return this.$store.state.tagsView.visitedViews
     }
   },

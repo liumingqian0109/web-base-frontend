@@ -112,42 +112,6 @@ const permission = {
         })
       })
     }
-    // GenerateRoutes({ commit }, data) { // roles是用户所带的权限
-    //   return new Promise(resolve => {
-    //     const { roles } = data
-    //     var asyncRouterMap = []
-    //     // console.log(data)
-    //     roleMenu(data).then(response => {
-    //       // const permission = response.data.permission
-    //       // setPermission(permission)
-    //       console.log(response.data.asyncRouterMap)
-    //       asyncRouterMap = response.data.asyncRouterMap
-    //       const asyncRouter = filterAsyncRouter(asyncRouterMap)
-    //       const accessedRouters = asyncRouter.filter(v => {
-    //       // if (roles.indexOf('admin') >= 0) {
-    //       //     return true;
-    //       // };
-    //         if (hasPermission(roles, v)) {
-    //           if (v.children && v.children.length > 0) {
-    //             v.children = v.children.filter(child => {
-    //               if (hasPermission(roles, child)) {
-    //                 return child
-    //               }
-    //               return false
-    //             })
-    //             return v
-    //           } else {
-    //             return v
-    //           }
-    //         }
-    //         return false
-    //       })
-    //       commit('SET_ROUTERS', accessedRouters)// 读取操作之后的数据
-    //       commit('SET_PERMISSION', permission)
-    //       resolve()
-    //     })
-    //   })
-    // }
   }
 }
 
