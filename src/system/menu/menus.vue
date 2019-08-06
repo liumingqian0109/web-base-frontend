@@ -369,8 +369,8 @@ export default {
           const menuId = this.$refs.tree.getCheckedKeys()
           const tempData = {
             parentId: this.temp.parentId,
-            id: this.temp.id,
-            menuName: this.temp.title,
+            menuId: this.temp.id,
+            menuName: this.temp.menuName,
             path: this.temp.path,
             component: this.temp.component,
             perms: this.temp.permission,

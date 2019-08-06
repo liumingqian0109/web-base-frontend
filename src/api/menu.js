@@ -28,17 +28,9 @@ export function treeList() {
     // params: query
   })
 }
-export function updateTree(data) {
-  return request({
-    url: '/role/roleMenu/' + data,
-    method: 'get',
-    data
-  })
-}
 export function deleteMenu(data) {
   return request({
     url: '/menu/' + data,
-    method: 'delete',
-    data
+    method: 'delete'
   })
 }
