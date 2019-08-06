@@ -78,6 +78,7 @@ const user = {
       const userName = Cookies.get(usernameKey)
       return new Promise((resolve, reject) => {
         getUserInfo(userName).then(response => {
+          console.log(response.data)
           // 由于mockjs 不支持自定义状态码只能这样hack
           if (!response.data) {
             reject('Verification failed, please login again.')

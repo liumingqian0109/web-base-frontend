@@ -1,12 +1,12 @@
 <template>
   <div>
     <el-form :inline="true" class="demo-form-inline" align='center'>
-      <el-form-item label="角色" collapse-tags>
-        <el-input v-model="userName" placeholder="请填写角色"></el-input>
+      <el-form-item label="菜单名称" collapse-tags>
+        <el-input v-model="search.menuName" placeholder="请填写菜单名称"></el-input>
       </el-form-item>
       <el-form-item label="创建时间">
         <el-date-picker
-          v-model="date"
+          v-model="time"
           type="datetimerange"
           range-separator="至"
           start-placeholder="开始日期"
@@ -15,7 +15,7 @@
         ></el-date-picker>
       </el-form-item>
       <el-button-group class="buttonGroup">
-        <el-button class="search" type="primary" icon="el-icon-search">搜索</el-button>
+        <el-button class="search" @click="handleSearch" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button @click="handCreate" v-hasPermission="'menu:add'" type="primary" icon="el-icon-plus">添加</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
         <el-button type="primary" icon="el-icon-download">导出excal</el-button>
@@ -32,7 +32,7 @@
         style="width: 400px margin-left:50px"
       >
         <el-form-item :label="$t('menu.menuName')" prop="type">
-          <el-input v-model="temp.title" class="filter-item" placeholder="请填写菜单名"></el-input>
+          <el-input v-model="temp.menuName" class="filter-item" placeholder="请填写菜单名"></el-input>
         </el-form-item>
         <el-form-item :label="$t('menu.menuAddress')">
           <el-input class="filter-item" v-model="temp.path" placeholder="请填写菜单地址"></el-input>
@@ -46,10 +46,13 @@
           </el-input>
         </el-form-item>
         <el-form-item :label="$t('menu.menuRole')">
-          <el-input class="filter-item" v-model="temp.permission" placeholder="请选择相关权限"></el-input>
+          <el-input class="filter-item" v-model="temp.perms" placeholder="请选择相关权限"></el-input>
         </el-form-item>
         <el-form-item :label="$t('menu.menuSorting')">
-          <el-input class="filter-item" v-model="temp.order" placeholder="菜单排序"></el-input>
+          <el-input class="filter-item" v-model="temp.orderNum" placeholder="菜单排序"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('menu.type')">
+          <el-input class="filter-item" v-model="temp.type" placeholder="类型"></el-input>
         </el-form-item>
       </el-form>
       <!-- 添加窗口的树形结构 -->
@@ -116,7 +119,7 @@
   Created: 2018/1/19-14:54
 */
 import Icons from './icon'
-import { fetchList, updateMenu, createMenu, treeList, updateTree } from '@/api/menu'
+import { fetchList, updateMenu, createMenu, treeList, deleteMenu } from '@/api/menu'
 // table tree
 import treeTable from '@/components/TreeTable'
 import Pagination from '@/components/Pagination'
@@ -151,13 +154,16 @@ export default {
   },
   data() {
     return {
-      userName: '',
+      search: {
+        menuName: ''
+      },
       treeKey: [],
-      date: '',
+      time: '',
       columns: [
         {
           text: '名称',
-          value: 'title'
+          value: 'title',
+          width: '200'
         },
         {
           text: '图标',
@@ -178,6 +184,14 @@ export default {
         {
           text: '权限',
           value: 'permission'
+        },
+        {
+          text: '创建时间',
+          value: 'createTime'
+        },
+        {
+          text: '修改时间',
+          value: 'modifyTime'
         }
       ],
       content: Array,
@@ -203,12 +217,12 @@ export default {
       dialogPvVisible: false, // dialog确定开关
       pvData: [],
       temp: {
-        title: '',
+        menuName: '',
         path: '',
         component: '',
         icon: '',
-        permission: '',
-        order: ''
+        perms: '',
+        orderNum: ''
       },
       tree: '',
       list: ''
@@ -219,9 +233,27 @@ export default {
     this.treeRole()
   },
   methods: {
+    formatTime(value) {
+      var d = new Date(value)
+      const resDate = d.getFullYear() + '-' + this.p((d.getMonth() + 1)) + '-' + this.p(d.getDate())
+      const resTime = this.p(d.getHours()) + ':' + this.p(d.getMinutes()) + ':' + this.p(d.getSeconds())
+      return resDate + ' ' + resTime
+    },
+    p(s) {
+      return s < 10 ? '0' + s : s
+    },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
+      if (this.time === '') {
+        this.search.createTimeFrom = ''
+        this.search.createTimeTo = ''
+      } else {
+        this.search.createTimeFrom = this.formatTime(this.time[0])
+        this.search.createTimeTo = this.formatTime(this.time[1])
+      }
+      this.search.listQuery = this.listQuery
+      fetchList(this.search).then(response => {
+        console.log(this.search)
         console.log(response.data)
         this.content = response.data.rows.children
         this.total = response.data.total
@@ -232,14 +264,18 @@ export default {
         }, 1.5 * 1000)
       })
     },
+    handleSearch() {
+      this.getList()
+    },
     resetTemp() {
       this.temp = {
-        title: '',
+        menuName: '',
         path: '',
         component: '',
         icon: '',
-        permission: '',
-        order: ''
+        perms: '',
+        orderNum: '',
+        type: ''
       }
     },
     handCreate() {
@@ -254,18 +290,18 @@ export default {
     createData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.temp.menuId = this.$refs.tree.getCheckedKeys()
+          const menuId = this.$refs.tree.getCheckedKeys()
+          this.temp.parentId = menuId[0]
           const tempData = Object.assign({}, this.temp)
-          createMenu(tempData).then(() => {
-            console.log(tempData)
-            if (tempData.menuId.length > 1) {
-              this.$notify({
-                title: '失败',
-                message: '最多只能选择一个上级部门,请修改',
-                type: 'error'
-              })
-              return
-            } else {
+          if (menuId.length > 1) {
+            this.$notify({
+              title: '失败',
+              message: '最多只能选择一个上级部门,请修改',
+              type: 'error'
+            })
+            return
+          } else {
+            createMenu(tempData).then(() => {
               this.$notify({
                 title: '成功',
                 message: '创建成功',
@@ -274,8 +310,8 @@ export default {
               })
               this.dialogFormVisible = false
               this.getList()
-            }
-          })
+            })
+          }
         }
       })
     },
@@ -311,42 +347,49 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
+      this.temp.menuName = row.title
+      this.temp.orderNum = row.order
+      this.temp.perms = row.permission
+      const treeKey = []
+      treeKey.push(row.parentId)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-      const data = this.temp.id
-      updateTree(data).then(response => {
-        this.tree = response.data.rows.rows.children
-        this.treeKey = response.data.menuIds
-        this.$refs.tree.setCheckedKeys(this.treeKey)
+      console.log(row)
+      treeList().then(response => {
+        this.tree = response.data.rows.children
+        this.$refs.tree.setCheckedKeys(treeKey)
       })
     },
     updateData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.temp = {
-            event: this.temp.event,
-            address: this.temp.address,
+          const menuId = this.$refs.tree.getCheckedKeys()
+          const tempData = {
+            parentId: this.temp.parentId,
+            id: this.temp.id,
+            menuName: this.temp.title,
+            path: this.temp.path,
             component: this.temp.component,
-            icon: this.temp.icon,
-            role: this.temp.role,
-            sort: this.temp.sort,
-            tree: this.tree,
-            menuId: this.$refs.tree.getCheckedKeys()
+            perms: this.temp.permission,
+            type: this.temp.type,
+            orderNum: this.temp.order,
+            icon: this.temp.icon
           }
-          const tempData = Object.assign({}, this.temp)
-          updateMenu(tempData).then(() => {
-            if (tempData.pId.length > 1) {
-              this.$notify({
-                title: '失败',
-                message: '最多只能选择一个上级部门,请修改',
-                type: 'error',
-                duration: 2000
-              })
-              return
-            } else {
+          console.log(tempData)
+          if (menuId.length > 1) {
+            this.$notify({
+              title: '失败',
+              message: '最多只能选择一个上级部门,请修改',
+              type: 'error',
+              duration: 2000
+            })
+            return
+          } else {
+            updateMenu(tempData).then(() => {
+              // console.log(tempData)
               this.dialogFormVisible = false
               this.$notify({
                 title: '成功',
@@ -354,9 +397,23 @@ export default {
                 type: 'success',
                 duration: 2000
               })
-            }
-          })
+              this.getList()
+            })
+          }
         }
+      })
+    },
+    handleDelete(row) {
+      // console.log(row.id)
+      const data = row.id
+      deleteMenu(data).then(() => {
+        this.$notify({
+          title: '成功',
+          message: '更新成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
       })
     },
     handleClose() {

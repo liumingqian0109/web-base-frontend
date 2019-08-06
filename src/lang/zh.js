@@ -173,7 +173,8 @@ export default {
     menuRole: '相关权限',
     menuSorting: '菜单排序',
     BtnName: '按钮名称',
-    BtnMenu: '相关权限'
+    BtnMenu: '相关权限',
+    type: '类型'
   },
   department: {
     departmentName: '部门名称',

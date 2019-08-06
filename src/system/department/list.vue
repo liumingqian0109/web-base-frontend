@@ -288,7 +288,6 @@ export default {
           }
           const tempData = Object.assign({}, this.temp)
           // tempData.updateTime = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          console.log(tempData)
           if (menuId.length > 1) {
             this.$notify({
               title: '失败',
@@ -299,7 +298,6 @@ export default {
             return
           } else {
             updateDepartment(tempData).then(() => {
-              console.log(tempData)
               this.dialogFormVisible = false
               this.$notify({
                 title: '成功',
