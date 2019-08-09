@@ -180,7 +180,7 @@ export default {
         this.search.createTimeTo = this.formatTime(this.time[1])
       }
       this.search.listQuery = this.listQuery
-      // console.log(this.search)
+      console.log(this.search)
       fetchList(this.search).then(response => {
         // console.log(response.data.rows.children)
         this.content = response.data.rows.children

@@ -23,7 +23,7 @@ export function updateDepartment(data) {
 }
 export function deleteDepartment(data) {
   return request({
-    url: '/dept/deletNew/' + data,
+    url: '/dept/' + data,
     method: 'delete'
   })
 }

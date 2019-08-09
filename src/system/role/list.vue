@@ -269,6 +269,7 @@ export default {
         listQuery
       }
       fetchList(data).then(response => {
+        console.log(response.data)
         this.list = response.data.rows
         this.total = response.data.total
         setTimeout(() => {
@@ -299,19 +300,19 @@ export default {
       console.log('tree drop: ', dropNode.label, dropType)
     },
     sortChange(data) {
-      const { prop, order } = data
+      const { prop, roleId } = data
       if (prop === 'id') {
-        this.sortByID(order)
+        this.sortByID(roleId)
       }
     },
-    // sortByID(order) {
-    //   if (order === 'ascending') {
-    //     this.listQuery.sort = '+id'
-    //   } else {
-    //     this.listQuery.sort = '-id'
-    //   }
-    //   this.handleFilter()
-    // },
+    sortByID(roleId) {
+      if (roleId === 'ascending') {
+        this.listQuery.sort = '+id'
+      } else {
+        this.listQuery.sort = '-id'
+      }
+      this.handleFilter()
+    },
     resetTemp() {
       this.temp = {
         remark: '',
@@ -335,21 +336,29 @@ export default {
     },
     createData() {
       const keyArr = this.$refs.tree.getCheckedKeys()
-      console.log(keyArr)
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           this.temp.menuId = keyArr
-          createRole(this.temp).then(response => {
-            this.list.unshift(this.temp)
-            this.dialogFormVisible = false
+          if (this.temp.roleName !== '') {
+            createRole(this.temp).then(response => {
+              this.list.unshift(this.temp)
+              this.dialogFormVisible = false
+              this.$notify({
+                title: '成功',
+                message: '创建成功',
+                type: 'success',
+                duration: 2000
+              })
+              this.getList()
+            })
+          } else {
             this.$notify({
-              title: '成功',
-              message: '创建成功',
-              type: 'success',
+              title: '失败',
+              message: '创建失败,用户不能为空',
+              type: 'error',
               duration: 2000
             })
-            this.getList()
-          })
+          }
         }
       })
     },
@@ -361,10 +370,13 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
       const data = this.temp.roleId
-      updateTree(data).then(response => {
-        this.tree = response.data.rows.rows.children
-        this.treeKey = response.data.menuIds
-        this.$refs.tree.setCheckedKeys(this.treeKey)
+      treeList().then(response => {
+        this.tree = response.data.rows.children
+        updateTree(data).then(response => {
+          // console.log(response.data)
+          this.treeKey = response.data
+          this.$refs.tree.setCheckedKeys(this.treeKey)
+        })
       })
     },
     updateData() {
@@ -374,6 +386,7 @@ export default {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
+          console.log(tempData)
           updateRole(tempData).then(() => {
             console.log(tempData)
             this.dialogFormVisible = false

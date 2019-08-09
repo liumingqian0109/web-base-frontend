@@ -23,9 +23,8 @@ export function createRole(data) {
 }
 export function updateTree(data) {
   return request({
-    url: '/role/roleMenu/' + data,
-    method: 'get',
-    data
+    url: 'role/role-menu/' + data,
+    method: 'get'
   })
 }
 export function updateRole(data) {

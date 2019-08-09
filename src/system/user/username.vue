@@ -6,7 +6,7 @@
       </el-form-item>
       <el-form-item label="部门" collapse-tags>
         <el-select v-model="search.department" placeholder="请选择部门">
-          <!-- <el-option></el-option> -->
+          <el-option>请选择部门</el-option>
           <el-option
             v-for="item in options"
             :key="item.value"
@@ -29,7 +29,6 @@
       <el-button class="search" @click="handleFilter" type="primary" icon="el-icon-search">搜索</el-button>
       <el-button-group class="buttonGroup">
         <el-button v-hasPermission="'user:add'" type="primary" @click="handleCreate" icon="el-icon-plus">添加</el-button>
-        <!-- <el-button type="info" icon="el-icon-delete">删除</el-button> -->
       </el-button-group>
     </el-form>
     <!-- table -->
@@ -81,7 +80,6 @@
       <el-table-column :label="$t('system.status')" class-name="status-col">
         <template slot-scope="scope">
           <span>{{ scope.row.status }}</span>
-          <!-- <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag> -->
         </template>
       </el-table-column>
       <el-table-column
@@ -122,16 +120,17 @@
         :rules="rules"
         :model="temp"
         label-position="left"
+        hide-required-asterisk
         label-width="70px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item :label="$t('system.username')" prop="type">
+        <el-form-item :label="$t('system.username')" prop="username">
           <el-input v-model="temp.username" class="filter-item" placeholder="请填写用户名"></el-input>
         </el-form-item>
-        <el-form-item :label="$t('system.password')" prop="type">
-          <el-input v-model="temp.password" class="filter-item" placeholder="请填写密码"></el-input>
+        <el-form-item :label="$t('system.password')" prop="password">
+          <el-input show-password v-model="temp.password" class="filter-item" placeholder="请填写密码"></el-input>
         </el-form-item>
-        <el-form-item :label="$t('system.roleId')" prop="title">
+        <el-form-item :label="$t('system.roleId')" prop="roleId">
           <el-select v-model="temp.roleId" class="filter-item" placeholder="请选择级别">
             <el-option
               v-for="item in selectRoleId"
@@ -141,7 +140,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('system.sex')" prop="title">
+        <el-form-item :label="$t('system.sex')">
           <el-select v-model="temp.ssex" class="filter-item" placeholder="请选择性别">
             <el-option
               v-for="item in selectSex"
@@ -161,7 +160,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('system.tel')">
+        <el-form-item :label="$t('system.tel')" prop="mobile">
           <el-input v-model="temp.mobile" class="filter-item" placeholder="请填写手机号"></el-input>
         </el-form-item>
         <el-form-item :label="$t('system.mail')">
@@ -194,10 +193,6 @@ import { fetchList, createUser, updateUser, deleteUser } from '@/api/user'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-// import { getPermission } from '@/utils/auth'
-// import store from '../../store'
-// import { mapGetters } from 'vuex'
-
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
   { key: 'US', display_name: 'USA' },
@@ -295,18 +290,15 @@ export default {
         { value: '72', label: '普通用户' }
       ],
       showReviewer: false,
-      // id: 0,
-
       temp: {
-        userId: '',
-        // timestamp: new Date(),
         status: '',
         username: '',
         ssex: '',
         deptName: '',
         mobile: '',
         email: '',
-        roleId: ''
+        roleId: '',
+        password: ''
       },
       search: {
         department: '',
@@ -321,24 +313,28 @@ export default {
       },
       dialogPvVisible: false,
       pvData: [],
+      // 校验
       rules: {
-        // type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [
-          {
-            type: 'date',
-            required: true,
-            message: 'timestamp is required',
-            trigger: 'change'
-          }
+        username: [
+          { required: true, message: '请输入用户名称', trigger: 'blur' },
+          { min: 6, max: 12, message: '长度在 6 到 125 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入用户密码', trigger: 'blur' },
+          { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
+        ],
+        roleId: [
+          { required: true, message: '请选择级别', trigger: 'change' }
+        ],
+        mobile: [
+          { required: true, message: '请输入手机号', trigger: 'blur' }
         ]
-        // title: [{ required: true, message: 'title is required', trigger: 'blur' }]
       },
       downloadLoading: false
     }
   },
   created() {
     this.getList()
-    // this.permission()
   },
   methods: {
     // 时间戳转换
@@ -350,6 +346,27 @@ export default {
     },
     p(s) {
       return s < 10 ? '0' + s : s
+    },
+    success(res, flag) {
+      if (res.data.state === 1) {
+        this.$notify({
+          title: '成功',
+          message: res.data.message,
+          type: 'success',
+          duration: 2000
+        })
+        if (flag) {
+          flag = false
+        }
+        this.getList()
+      } else {
+        this.$notify({
+          title: '失败',
+          message: res.data.message,
+          type: 'error',
+          duration: 2000
+        })
+      }
     },
     getList() {
       this.listLoading = true
@@ -400,14 +417,13 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        userId: undefined,
-        // timestamp: new Date(),
         status: '',
         username: '',
         ssex: '',
         deptName: '',
         mobile: '',
-        email: ''
+        email: '',
+        password: ''
       }
     },
     handleCreate() {
@@ -421,27 +437,16 @@ export default {
     createData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          // this.temp.author = 'vue-element-admin'
-          createUser(this.temp).then(() => {
-            console.log(this.temp)
+          createUser(this.temp).then(response => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '创建成功',
-              type: 'success',
-              duration: 2000
-            })
-            this.getList()
+            this.success(response)
           })
         }
       })
     },
     handleUpdate(row) {
-      // console.log(row)
       this.temp = Object.assign({}, row) // copy obj
-      // this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -452,49 +457,36 @@ export default {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          // tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateUser(tempData).then(() => {
-            // for (const v of this.list) {
-            //   if (v.id === this.temp.userId) {
-            //     const index = this.list.indexOf(v)
-            //     this.list.splice(index, 1, this.temp)
-            //     break
-            //   }
-            // }
-            this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '更新成功',
-              type: 'success',
-              duration: 2000
-            })
-            this.getList()
+          updateUser(tempData).then(response => {
+            // console.log(response.data)
+            if (response.data.state === 1) {
+              this.dialogFormVisible = false
+              this.$notify({
+                title: '成功',
+                message: response.data.message,
+                type: 'success',
+                duration: 2000
+              })
+              this.getList()
+            } else {
+              this.$notify({
+                title: '失败',
+                message: response.data.message,
+                type: 'error',
+                duration: 2000
+              })
+            }
           })
         }
       })
     },
     handleModifyStatus(row, status) {
-      // console.log()
       const data = row.userId
-      deleteUser(data).then(() => {
-        this.getList()
-        this.$message({
-          message: '操作成功',
-          type: 'success'
-        })
+      deleteUser(data).then(response => {
+        // console.log(response)
+        this.success(response)
       })
     },
-    // handleDelete(row) {
-    //   console.log(row)
-    //   this.$notify({
-    //     title: '成功',
-    //     message: '删除成功',
-    //     type: 'success',
-    //     duration: 2000
-    //   })
-    //   const index = this.list.indexOf(row)
-    //   this.list.splice(index, 1)
-    // },
     formatJson(filterVal, jsonData) {
       return jsonData.map(v =>
         filterVal.map(j => {

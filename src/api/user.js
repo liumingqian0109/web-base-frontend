@@ -16,7 +16,7 @@ export function fetchArticle(id) {
 }
 export function createUser(data) {
   return request({
-    url: '/user/add',
+    url: '/user',
     method: 'post',
     data
   })
@@ -28,17 +28,9 @@ export function updateUser(data) {
     data
   })
 }
-// export function searchUser(data) {
-//   return request({
-//     url: '/user/search',
-//     method: 'post',
-//     data
-//   })
-// }
 export function deleteUser(data) {
   return request({
     url: '/user/' + data,
     method: 'delete'
-    // data
   })
 }

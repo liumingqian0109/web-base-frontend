@@ -11,15 +11,7 @@ const _import = require('../../router/_import_' + process.env.NODE_ENV) // èŽ·å
  * @param route
  */
 function hasPermission2(v) {
-  // if (route.meta && route.meta.roles) {
-  //   return roles.some(role => route.meta.roles.includes(role))
-  // } else {
-  //   return true
-  // }
   const permissions = store.getters && store.getters.permissionsBtn
-  // console.log(store.getters.permissionsBtn)
-  // const value = permission.value.split(',')
-  // const flag = true
   return v === '' || permissions.includes(v)
 }
 
@@ -92,10 +84,6 @@ const permission = {
           console.log(response.data)
           const asyncRouter = filterAsyncRouter(asyncRouterMap)
           const accessedRouters = asyncRouter.filter(v => {
-          // if (roles.indexOf('admin') >= 0) {
-          //     return true;
-          // };
-            console.log('a111:' + v)
             if (hasPermission2(v.permission)) {
               if (v.children && v.children.length > 0) {
                 v.children = v.children.filter(child => {

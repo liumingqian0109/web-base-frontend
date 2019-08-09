@@ -252,6 +252,7 @@ export default {
         this.search.createTimeTo = this.formatTime(this.time[1])
       }
       this.search.listQuery = this.listQuery
+      console.log(this.search)
       fetchList(this.search).then(response => {
         console.log(this.search)
         console.log(response.data)
@@ -293,6 +294,7 @@ export default {
           const menuId = this.$refs.tree.getCheckedKeys()
           this.temp.parentId = menuId[0]
           const tempData = Object.assign({}, this.temp)
+          console.log(tempData)
           if (menuId.length > 1) {
             this.$notify({
               title: '失败',
