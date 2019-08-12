@@ -44,6 +44,7 @@ function filterAsyncRouter(asyncRouterMap) { // 遍历后台传来的路由字�
       } else {
         route.component = _import(route.component)
       }
+      route.name = route.title
       route.meta = { title: route.title, icon: route.icon, alwaysShow: true }
       route.alwaysShow = true
     } else {
@@ -78,10 +79,8 @@ const permission = {
         // const { roles } = data
         var asyncRouterMap = []
         roleMenu(data).then(response => {
-          // setPermission(permission)
-          // console.log(response.data)
           asyncRouterMap = response.data.rows.children
-          console.log(response.data)
+          console.log(asyncRouterMap)
           const asyncRouter = filterAsyncRouter(asyncRouterMap)
           const accessedRouters = asyncRouter.filter(v => {
             if (hasPermission2(v.permission)) {

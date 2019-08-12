@@ -1,5 +1,6 @@
 import { loginByUsername, logout, getUserInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
+import { Message } from 'element-ui'
 import Cookies from 'js-cookie'
 
 const usernameKey = 'userName'
@@ -66,8 +67,13 @@ const user = {
         loginByUsername(username, userInfo.password).then(response => {
           const data = response.data.data
           console.log(response.data)
-          commit('SET_TOKEN', data.token)
-          setToken(data.token)
+          if (data.state === 0) {
+            Message.error(data.message)
+          } else {
+            Message.success(data.message)
+            commit('SET_TOKEN', data.token)
+            setToken(data.token)
+          }
           resolve()
         }).catch(error => {
           reject(error)
@@ -79,8 +85,6 @@ const user = {
       const userName = Cookies.get(usernameKey)
       return new Promise((resolve, reject) => {
         getUserInfo(userName).then(response => {
-          console.log(response.data)
-          // 由于mockjs 不支持自定义状态码只能这样hack
           if (!response.data) {
             reject('Verification failed, please login again.')
           }

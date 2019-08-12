@@ -37,7 +37,7 @@ export function getUserInfo(username) {
   // }
   return request({
     url: 'login/user-info',
-    method: 'post',
+    method: 'get',
     params: data
   })
 }

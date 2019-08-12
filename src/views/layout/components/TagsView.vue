@@ -40,7 +40,6 @@ export default {
   },
   computed: {
     visitedViews() {
-      // console.log(this.$store.state.menu.asyncRouterMap)
       return this.$store.state.tagsView.visitedViews
     }
   },
@@ -63,7 +62,7 @@ export default {
   methods: {
     generateTitle, // generateTitle by vue-i18n
     isActive(route) {
-      console.log(route)
+      console.log(this.$route)
       return route.path === this.$route.path
     },
     addViewTags() {
@@ -123,6 +122,7 @@ export default {
       this.$router.push('/')
     },
     openMenu(tag, e) {
+      console.log(tag, e)
       const menuMinWidth = 105
       const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
       const offsetWidth = this.$el.offsetWidth // container width
