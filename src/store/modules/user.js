@@ -67,16 +67,13 @@ const user = {
         loginByUsername(username, userInfo.password).then(response => {
           const data = response.data.data
           console.log(response.data)
-          if (data.state === 0) {
-            Message.error(data.message)
-          } else {
-            Message.success(data.message)
-            commit('SET_TOKEN', data.token)
-            setToken(data.token)
-          }
+          commit('SET_TOKEN', data.token)
+          setToken(data.token)
           resolve()
         }).catch(error => {
-          reject(error)
+          console.log(error.response)
+          Message.error(error.response.data.message)
+          resolve()
         })
       })
     },
@@ -85,25 +82,26 @@ const user = {
       const userName = Cookies.get(usernameKey)
       return new Promise((resolve, reject) => {
         getUserInfo(userName).then(response => {
-          if (!response.data) {
-            reject('Verification failed, please login again.')
-          }
-          const data = response.data.data
-          if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', data.roles)
-            commit('SET_USERNAME', data.user.username)
-            commit('SET_USERID', data.user.userId)
+          if (response.data.retureCode === 1) {
+            Message.error(response.data.message)
           } else {
-            reject('getInfo: roles must be a non-null array!')
+            const data = response.data.data
+            if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
+              commit('SET_ROLES', data.roles)
+              commit('SET_USERNAME', data.user.username)
+              commit('SET_USERID', data.user.userId)
+            } else {
+              reject('getInfo: roles must be a non-null array!')
+            }
+            commit('SET_NAME', data.user.username)
+            const avatar = 'src/assets/' + data.user.avatar
+            const permissionsBtn = data.permissions
+            console.log(permissionsBtn)
+            commit('SET_AVATAR', avatar)
+            commit('SET_INTRODUCTION', data.introduction)
+            commit('SET_PERMISSIONBTN', permissionsBtn)
+            Message.success(response.data.message)
           }
-
-          commit('SET_NAME', data.user.username)
-          const avatar = 'src/assets/' + data.user.avatar
-          const permissionsBtn = data.permissions
-          console.log(permissionsBtn)
-          commit('SET_AVATAR', avatar)
-          commit('SET_INTRODUCTION', data.introduction)
-          commit('SET_PERMISSIONBTN', permissionsBtn)
           resolve(response)
         }).catch(error => {
           reject(error)

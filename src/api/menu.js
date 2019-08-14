@@ -34,3 +34,9 @@ export function deleteMenu(data) {
     method: 'delete'
   })
 }
+export function excelMenu(data) {
+  return request({
+    url: '/menu/excel',
+    method: 'post'
+  })
+}

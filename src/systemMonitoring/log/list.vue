@@ -17,7 +17,7 @@
       <el-button-group class="buttonGroup">
         <el-button class="search" @click="handleSearch" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
-        <el-button type="primary" icon="el-icon-download">导出excal</el-button>
+        <el-button type="primary" @click="excal" icon="el-icon-download">导出excal</el-button>
       </el-button-group>
     </el-form>
     <el-table
@@ -80,7 +80,7 @@
   </div>
 </template>
 <script>
-import { fetchList, deleteLog } from '@/api/log'
+import { fetchList, deleteLog, excelTable } from '@/api/log'
 export default {
   data() {
     return {
@@ -166,6 +166,17 @@ export default {
           duration: 2000
         })
         this.getList()
+      })
+    },
+    excal() {
+      excelTable().then(response => {
+        console.log(response)
+        this.$notify({
+          title: '成功',
+          message: '导出成功',
+          type: 'success',
+          duration: 2000
+        })
       })
     }
   }

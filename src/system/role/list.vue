@@ -248,6 +248,24 @@ export default {
     p(s) {
       return s < 10 ? '0' + s : s
     },
+    success(res) {
+      if (res.retureCode === 0) {
+        this.$notify({
+          title: '成功',
+          message: res.message,
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
+      } else {
+        this.$notify({
+          title: '失败',
+          message: res.message,
+          type: 'error',
+          duration: 2000
+        })
+      }
+    },
     getList() {
       this.listLoading = true
       // const deptId = this.search.department
@@ -339,26 +357,11 @@ export default {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           this.temp.menuId = keyArr
-          if (this.temp.roleName !== '') {
-            createRole(this.temp).then(response => {
-              this.list.unshift(this.temp)
-              this.dialogFormVisible = false
-              this.$notify({
-                title: '成功',
-                message: '创建成功',
-                type: 'success',
-                duration: 2000
-              })
-              this.getList()
-            })
-          } else {
-            this.$notify({
-              title: '失败',
-              message: '创建失败,用户不能为空',
-              type: 'error',
-              duration: 2000
-            })
-          }
+          createRole(this.temp).then(response => {
+            this.list.unshift(this.temp)
+            this.dialogFormVisible = false
+            this.success(response.data)
+          })
         }
       })
     },
@@ -387,16 +390,10 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           console.log(tempData)
-          updateRole(tempData).then(() => {
-            console.log(tempData)
+          updateRole(tempData).then(response => {
+            console.log(response)
             this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '更新成功',
-              type: 'success',
-              duration: 2000
-            })
-            this.getList()
+            this.success(response.data)
           })
         }
       })
@@ -404,14 +401,8 @@ export default {
     handleDelete(row) {
       console.log(row)
       const data = row.roleId
-      deleteRole(data).then(() => {
-        this.$notify({
-          title: '成功',
-          message: '删除成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.getList()
+      deleteRole(data).then(response => {
+        this.success(response.data)
       })
     },
     // handleCheckChange(data, checked, indeterminate) {
@@ -438,7 +429,6 @@ export default {
       )
     },
     handleSelectChangeLeft(rows) {
-      console.log(rows)
       var ids = []
       for (var i = 0; i < rows.length; i++) {
         console.log(rows[i].id)

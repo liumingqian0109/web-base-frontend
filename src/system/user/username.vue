@@ -57,10 +57,10 @@
           <span>{{ scope.row.username}}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('system.sex')" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.ssex }}</span>
-        </template>
+      <el-table-column prop="ssex" :label="$t('system.sex')" :formatter="sexChange" align="center">
+        <!-- <template slot-scope="scope">
+          <span>{{ scope.row.ssex | sexChange(scope.row) }}</span>
+        </template> -->
       </el-table-column>
       <el-table-column :label="$t('system.department')" align="center">
         <template slot-scope="scope">
@@ -317,7 +317,7 @@ export default {
       rules: {
         username: [
           { required: true, message: '请输入用户名称', trigger: 'blur' },
-          { min: 6, max: 12, message: '长度在 6 到 125 个字符', trigger: 'blur' }
+          { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
         ],
         password: [
           { required: true, message: '请输入用户密码', trigger: 'blur' },
@@ -347,22 +347,19 @@ export default {
     p(s) {
       return s < 10 ? '0' + s : s
     },
-    success(res, flag) {
-      if (res.data.state === 1) {
+    success(res) {
+      if (res.retureCode === 0) {
         this.$notify({
           title: '成功',
-          message: res.data.message,
+          message: res.message,
           type: 'success',
           duration: 2000
         })
-        if (flag) {
-          flag = false
-        }
         this.getList()
       } else {
         this.$notify({
           title: '失败',
-          message: res.data.message,
+          message: res.message,
           type: 'error',
           duration: 2000
         })
@@ -440,7 +437,7 @@ export default {
           createUser(this.temp).then(response => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
-            this.success(response)
+            this.success(response.data)
           })
         }
       })
@@ -458,24 +455,8 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateUser(tempData).then(response => {
-            // console.log(response.data)
-            if (response.data.state === 1) {
-              this.dialogFormVisible = false
-              this.$notify({
-                title: '成功',
-                message: response.data.message,
-                type: 'success',
-                duration: 2000
-              })
-              this.getList()
-            } else {
-              this.$notify({
-                title: '失败',
-                message: response.data.message,
-                type: 'error',
-                duration: 2000
-              })
-            }
+            this.dialogFormVisible = false
+            this.success(response.data)
           })
         }
       })
@@ -483,7 +464,6 @@ export default {
     handleModifyStatus(row, status) {
       const data = row.userId
       deleteUser(data).then(response => {
-        // console.log(response)
         this.success(response)
       })
     },
@@ -497,6 +477,15 @@ export default {
           }
         })
       )
+    },
+    sexChange(val) {
+      if (val.ssex === '1') {
+        return '女'
+      } else if (val.ssex === '0') {
+        return '男'
+      } else {
+        return '保密'
+      }
     }
   }
 }

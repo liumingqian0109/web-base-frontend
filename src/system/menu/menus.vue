@@ -18,7 +18,7 @@
         <el-button class="search" @click="handleSearch" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button @click="handCreate" v-hasPermission="'menu:add'" type="primary" icon="el-icon-plus">添加</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
-        <el-button type="primary" icon="el-icon-download">导出excal</el-button>
+        <el-button type="primary" @click="exportExcel" icon="el-icon-download">导出excal</el-button>
       </el-button-group>
     </el-form>
     <!-- table -->
@@ -119,7 +119,7 @@
   Created: 2018/1/19-14:54
 */
 import Icons from './icon'
-import { fetchList, updateMenu, createMenu, treeList, deleteMenu } from '@/api/menu'
+import { fetchList, updateMenu, createMenu, treeList, deleteMenu, excelMenu } from '@/api/menu'
 // table tree
 import treeTable from '@/components/TreeTable'
 import Pagination from '@/components/Pagination'
@@ -242,6 +242,24 @@ export default {
     p(s) {
       return s < 10 ? '0' + s : s
     },
+    success(res) {
+      if (res.retureCode === 0) {
+        this.$notify({
+          title: '成功',
+          message: res.message,
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
+      } else {
+        this.$notify({
+          title: '失败',
+          message: res.message,
+          type: 'error',
+          duration: 2000
+        })
+      }
+    },
     getList() {
       this.listLoading = true
       if (this.time === '') {
@@ -294,7 +312,6 @@ export default {
           const menuId = this.$refs.tree.getCheckedKeys()
           this.temp.parentId = menuId[0]
           const tempData = Object.assign({}, this.temp)
-          console.log(tempData)
           if (menuId.length > 1) {
             this.$notify({
               title: '失败',
@@ -303,15 +320,10 @@ export default {
             })
             return
           } else {
-            createMenu(tempData).then(() => {
-              this.$notify({
-                title: '成功',
-                message: '创建成功',
-                type: 'success',
-                duration: 2000
-              })
+            createMenu(tempData).then(response => {
+              // console.log(response.data)
+              this.success(response.data)
               this.dialogFormVisible = false
-              this.getList()
             })
           }
         }
@@ -320,9 +332,9 @@ export default {
     // 重置刷新
     handleRefresh() {
       this.listQuery.page = 1
-      this.getList()
       this.date = ''
       this.userName = ''
+      this.getList()
     },
     treeRole() {
       treeList().then(response => {
@@ -368,9 +380,9 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          const menuId = this.$refs.tree.getCheckedKeys()
+          const pIdArr = this.$refs.tree.getCheckedKeys()
           const tempData = {
-            parentId: this.temp.parentId,
+            parentId: pIdArr[0],
             menuId: this.temp.id,
             menuName: this.temp.menuName,
             path: this.temp.path,
@@ -381,7 +393,7 @@ export default {
             icon: this.temp.icon
           }
           console.log(tempData)
-          if (menuId.length > 1) {
+          if (pIdArr.length > 1) {
             this.$notify({
               title: '失败',
               message: '最多只能选择一个上级部门,请修改',
@@ -390,16 +402,10 @@ export default {
             })
             return
           } else {
-            updateMenu(tempData).then(() => {
+            updateMenu(tempData).then(response => {
               // console.log(tempData)
               this.dialogFormVisible = false
-              this.$notify({
-                title: '成功',
-                message: '更新成功',
-                type: 'success',
-                duration: 2000
-              })
-              this.getList()
+              this.success(response.data)
             })
           }
         }
@@ -408,14 +414,8 @@ export default {
     handleDelete(row) {
       // console.log(row.id)
       const data = row.id
-      deleteMenu(data).then(() => {
-        this.$notify({
-          title: '成功',
-          message: '更新成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.getList()
+      deleteMenu(data).then(response => {
+        this.success(response.data)
       })
     },
     handleClose() {
@@ -427,6 +427,16 @@ export default {
     IconWrite(data) {
       this.temp.icon = data
       console.log(this.temp.icon)
+    },
+    exportExcel() {
+      excelMenu().then(() => {
+        this.$notify({
+          title: '成功',
+          message: '导出成功',
+          type: 'success',
+          duration: 2000
+        })
+      })
     }
   }
 }

@@ -170,6 +170,24 @@ export default {
     p(s) {
       return s < 10 ? '0' + s : s
     },
+    success(res) {
+      if (res.retureCode === 0) {
+        this.$notify({
+          title: '成功',
+          message: res.message,
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
+      } else {
+        this.$notify({
+          title: '失败',
+          message: res.message,
+          type: 'error',
+          duration: 2000
+        })
+      }
+    },
     getList() {
       this.listLoading = true
       if (this.time === '') {
@@ -245,16 +263,9 @@ export default {
             })
             return
           } else {
-            createDepartment(tempData).then(() => {
-            // console.log(this.temp)
-              this.$notify({
-                title: '成功',
-                message: '创建成功',
-                type: 'success',
-                duration: 2000
-              })
+            createDepartment(tempData).then(response => {
+              this.success(response.data)
               this.dialogFormVisible = false
-              this.getList()
             })
           }
         }
@@ -297,15 +308,9 @@ export default {
             })
             return
           } else {
-            updateDepartment(tempData).then(() => {
+            updateDepartment(tempData).then(response => {
               this.dialogFormVisible = false
-              this.$notify({
-                title: '成功',
-                message: '更新成功',
-                type: 'success',
-                duration: 2000
-              })
-              this.getList()
+              this.success(response.data)
             })
           }
         }
@@ -313,26 +318,10 @@ export default {
     },
     handleDelete(row) {
       const deptIds = row.id
+      // console.log(deptIds)
       deleteDepartment(deptIds).then(response => {
-        console.log(response.data)
-        const state = response.data.state
-        const message = response.data.message
-        if (state === 1) {
-          this.$notify({
-            title: '成功',
-            message: message,
-            type: 'success',
-            duration: 2000
-          })
-          this.getList()
-        } else {
-          this.$notify({
-            title: '失败',
-            message: message,
-            type: 'error',
-            duration: 2000
-          })
-        }
+        // console.log(response)
+        this.success(response.data)
       })
     },
     // 树形结构拖曳

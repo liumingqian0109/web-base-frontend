@@ -13,3 +13,9 @@ export function deleteLog(data) {
     method: 'delete'
   })
 }
+export function excelTable() {
+  return request({
+    url: '/log/excel',
+    method: 'post'
+  })
+}
