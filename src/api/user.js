@@ -34,3 +34,10 @@ export function deleteUser(data) {
     method: 'delete'
   })
 }
+export function exportUser(data) {
+  return request({
+    url: '/user/excel',
+    method: 'post',
+    data
+  })
+}

@@ -30,6 +30,9 @@
       <el-button-group class="buttonGroup">
         <el-button v-hasPermission="'user:add'" type="primary" @click="handleCreate" icon="el-icon-plus">添加</el-button>
       </el-button-group>
+      <el-button-group class="buttonGroup">
+        <el-button v-hasPermission="'user:export'" type="primary" @click="handleExport" icon="el-icon-download">导出</el-button>
+      </el-button-group>
     </el-form>
     <!-- table -->
     <el-table
@@ -189,7 +192,7 @@
 </template>
 
 <script>
-import { fetchList, createUser, updateUser, deleteUser } from '@/api/user'
+import { fetchList, createUser, updateUser, deleteUser, exportUser } from '@/api/user'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -465,6 +468,41 @@ export default {
       const data = row.userId
       deleteUser(data).then(response => {
         this.success(response)
+      })
+    },
+    handleExport() {
+      this.listLoading = true
+      const deptId = this.search.department
+      const username = this.search.userName
+      const listQuery = this.listQuery
+      var createTimeFrom
+      var createTimeTo
+      var data
+      if (this.search.time === '') {
+        createTimeFrom = ''
+        createTimeTo = ''
+      } else {
+        createTimeFrom = this.formatTime(this.search.time[0])
+        createTimeTo = this.formatTime(this.search.time[1])
+      }
+      data = {
+        createTimeFrom,
+        createTimeTo,
+        deptId,
+        username,
+        listQuery
+      }
+      exportUser(data).then(() => {
+        // console.log(response.data)
+        // this.$notify({
+        //   title: '失败',
+        //   message: '导出成功',
+        //   type: 'error',
+        //   duration: 2000
+        // })
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
       })
     },
     formatJson(filterVal, jsonData) {
