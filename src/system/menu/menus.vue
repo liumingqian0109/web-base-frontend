@@ -429,7 +429,17 @@ export default {
       console.log(this.temp.icon)
     },
     exportExcel() {
-      excelMenu().then(() => {
+      this.listLoading = true
+      if (this.time === '') {
+        this.search.createTimeFrom = ''
+        this.search.createTimeTo = ''
+      } else {
+        this.search.createTimeFrom = this.formatTime(this.time[0])
+        this.search.createTimeTo = this.formatTime(this.time[1])
+      }
+      this.search.listQuery = this.listQuery
+      // console.log(this.search)
+      excelMenu(this.search).then(() => {
         this.$notify({
           title: '成功',
           message: '导出成功',
