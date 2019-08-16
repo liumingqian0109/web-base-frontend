@@ -37,6 +37,7 @@ export function deleteMenu(data) {
 export function excelMenu(data) {
   return request({
     url: '/menu/excel',
-    method: 'post'
+    method: 'get',
+    data
   })
 }

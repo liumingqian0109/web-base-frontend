@@ -18,7 +18,7 @@
         <el-button class="search" @click="handleSearch" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
         <el-button type="primary" v-hasPermission="'dept:add'" @click="handCreate" icon="el-icon-plus">添加</el-button>
-        <el-button type="primary" icon="el-icon-download">导出excal</el-button>
+        <el-button type="primary" @click="ExportData" icon="el-icon-download">导出excal</el-button>
       </el-button-group>
     </el-form>
     <!-- table -->
@@ -78,7 +78,7 @@
   Auth: Lei.j1ang
   Created: 2018/1/19-14:54
 */
-import { fetchList, updateDepartment, createDepartment, deleteDepartment } from '@/api/department'
+import { fetchList, updateDepartment, createDepartment, deleteDepartment, excelDepartment } from '@/api/department'
 import treeTable from '@/components/TreeTable'
 import Pagination from '@/components/Pagination'
 export default {
@@ -348,6 +348,43 @@ export default {
     // 拖拽成功完成时触发的事件
     handleDrop(draggingNode, dropNode, dropType, ev) {
       console.log('tree drop: ', dropNode.label, dropType)
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v =>
+        filterVal.map(j => {
+          return v[j]
+        })
+      )
+    },
+    ExportData() {
+      import('@/vendor/Export2Excel').then(excel => {
+        this.listLoading = true
+        if (this.time === '') {
+          this.search.createTimeFrom = ''
+          this.search.createTimeTo = ''
+        } else {
+          this.search.createTimeFrom = this.formatTime(this.time[0])
+          this.search.createTimeTo = this.formatTime(this.time[1])
+        }
+        this.search.listQuery = this.listQuery
+        console.log(this.search)
+        excelDepartment(this.search).then(response => {
+          console.log(response.data)
+          const tHeader = ['序号', '部门名称', '排序', '创建时间', '修改时间']
+          // 与表头相对应的数据里边的字段
+          const filterVal = ['deptId', 'deptName', 'orderNum', 'createTime', 'modifyTime']
+          const list = response.data
+          const data = this.formatJson(filterVal, list)
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: '部门列表'
+          })
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 1000)
+        })
+      })
     }
   }
 }

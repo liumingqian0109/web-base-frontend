@@ -26,13 +26,15 @@
           align="right"
         ></el-date-picker>
       </el-form-item>
-      <el-button class="search" @click="handleFilter" type="primary" icon="el-icon-search">搜索</el-button>
-      <el-button-group class="buttonGroup">
+      <el-popover
+        placement="bottom"
+        width="350"
+        trigger="click">
+        <el-button class="search" @click="handleFilter" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button v-hasPermission="'user:add'" type="primary" @click="handleCreate" icon="el-icon-plus">添加</el-button>
-      </el-button-group>
-      <el-button-group class="buttonGroup">
         <el-button v-hasPermission="'user:export'" type="primary" @click="ExportData" icon="el-icon-download">导出</el-button>
-      </el-button-group>
+        <el-button slot="reference">操作</el-button>
+      </el-popover>
     </el-form>
     <!-- table -->
     <el-table
@@ -192,7 +194,7 @@
 </template>
 
 <script>
-import { fetchList, createUser, updateUser, deleteUser, exportUser } from '@/api/user'
+import { fetchList, createUser, updateUser, deleteUser } from '@/api/user'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -470,41 +472,6 @@ export default {
         this.success(response)
       })
     },
-    handleExport() {
-      this.listLoading = true
-      const deptId = this.search.department
-      const username = this.search.userName
-      const listQuery = this.listQuery
-      var createTimeFrom
-      var createTimeTo
-      var data
-      if (this.search.time === '') {
-        createTimeFrom = ''
-        createTimeTo = ''
-      } else {
-        createTimeFrom = this.formatTime(this.search.time[0])
-        createTimeTo = this.formatTime(this.search.time[1])
-      }
-      data = {
-        createTimeFrom,
-        createTimeTo,
-        deptId,
-        username,
-        listQuery
-      }
-      exportUser(data).then(() => {
-        // console.log(response.data)
-        // this.$notify({
-        //   title: '失败',
-        //   message: '导出成功',
-        //   type: 'error',
-        //   duration: 2000
-        // })
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-      })
-    },
     ExportData() {
       import('@/vendor/Export2Excel').then(excel => {
         // 表格的表头列表
@@ -530,23 +497,24 @@ export default {
           listQuery
         }
         fetchList(data).then(response => {
-          console.log(excel)
           const tHeader = ['序号', '创建时间', '用户管理', '性别', '部门', '手机号', '邮箱', '状态']
           // 与表头相对应的数据里边的字段
           const filterVal = ['userId', 'createTime', 'username', 'ssex', 'deptName', 'mobile', 'email', 'status']
           const list = response.data.rows
           const data = this.formatJson(filterVal, list)
           // 这里还是使用export_json_to_excel方法比较好，方便操作数据
-          excel.export_json_to_excel(tHeader, data, '用户管理')
+          // excel.export_table_to_excel(tHeader, data, '用户管理')
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: '用户管理'
+          })
           setTimeout(() => {
             this.listLoading = false
           }, 1.5 * 1000)
         })
       })
     },
-    // formatJson(filterVal, jsonData) {
-    //   return jsonData.map(v => filterVal.map(j => v[j]))
-    // },
     formatJson(filterVal, jsonData) {
       return jsonData.map(v =>
         filterVal.map(j => {

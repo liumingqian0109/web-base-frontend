@@ -18,7 +18,7 @@
         <el-button class="search" @click="handleFilter" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
         <el-button type="primary" v-hasPermission="'role:add'"  @click="handleCreate" icon="el-icon-plus">添加</el-button>
-        <el-button type="primary" @click="handleCreate" icon="el-icon-download">导出excal</el-button>
+        <el-button type="primary" @click="ExportData" icon="el-icon-download">导出excal</el-button>
       </el-button-group>
     </el-form>
     <!-- table -->
@@ -436,6 +436,47 @@ export default {
       }
       ids.push(row)
       console.log(ids)
+    },
+    ExportData() {
+      import('@/vendor/Export2Excel').then(excel => {
+        // 表格的表头列表
+        this.listLoading = true
+        // const deptId = this.search.department
+        const roleName = this.userName
+        const listQuery = this.listQuery
+        var createTimeFrom
+        var createTimeTo
+        if (this.time === '') {
+          createTimeFrom = ''
+          createTimeTo = ''
+        } else {
+          createTimeFrom = this.formatTime(this.time[0])
+          createTimeTo = this.formatTime(this.time[1])
+        }
+        const data = {
+          createTimeFrom,
+          createTimeTo,
+          roleName,
+          listQuery
+        }
+        fetchList(data).then(response => {
+          const tHeader = ['序号', '角色', '描述', '创建时间', '修改时间']
+          // 与表头相对应的数据里边的字段
+          const filterVal = ['roleId', 'roleName', 'remark', 'createTime', 'modifyTime']
+          const list = response.data.rows
+          const data = this.formatJson(filterVal, list)
+          // 这里还是使用export_json_to_excel方法比较好，方便操作数据
+          // excel.export_table_to_excel(tHeader, data, '用户管理')
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: '角色列表'
+          })
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 1000)
+        })
+      })
     }
   }
 }

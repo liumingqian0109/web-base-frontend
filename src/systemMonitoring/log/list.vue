@@ -17,7 +17,7 @@
       <el-button-group class="buttonGroup">
         <el-button class="search" @click="handleSearch" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
-        <el-button type="primary" @click="excal" icon="el-icon-download">导出excal</el-button>
+        <el-button type="primary" @click="ExportData" icon="el-icon-download">导出excal</el-button>
       </el-button-group>
     </el-form>
     <el-table
@@ -80,7 +80,7 @@
   </div>
 </template>
 <script>
-import { fetchList, deleteLog, excelTable } from '@/api/log'
+import { fetchList, deleteLog } from '@/api/log'
 export default {
   data() {
     return {
@@ -168,16 +168,45 @@ export default {
         this.getList()
       })
     },
-    excal() {
-      excelTable().then(response => {
-        console.log(response)
-        this.$notify({
-          title: '成功',
-          message: '导出成功',
-          type: 'success',
-          duration: 2000
+    ExportData() {
+      import('@/vendor/Export2Excel').then(excel => {
+        // 表格的表头列表
+        this.listLoading = true
+        this.listQuery = this.search.listQuery
+        if (this.search.time === '') {
+          this.search.createTimeFrom = ''
+          this.search.createTimeTo = ''
+        } else {
+          this.search.createTimeFrom = this.formatTime(this.search.time[0])
+          this.search.createTimeTo = this.formatTime(this.search.time[1])
+        }
+        // console.log(this.search)
+        fetchList(this.search).then(response => {
+          console.log(response.data)
+          const tHeader = ['用户', '操作描述', '耗时', '执行方法', '方法参数', 'IP地址']
+          // 与表头相对应的数据里边的字段
+          const filterVal = ['username', 'operation', 'time', 'method', 'params', 'ip']
+          const list = response.data.rows
+          const data = this.formatJson(filterVal, list)
+          // 这里还是使用export_json_to_excel方法比较好，方便操作数据
+          // excel.export_table_to_excel(tHeader, data, '用户管理')
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: '日志管理'
+          })
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 1000)
         })
       })
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v =>
+        filterVal.map(j => {
+          return v[j]
+        })
+      )
     }
   }
 }

@@ -18,7 +18,7 @@
         <el-button class="search" @click="handleSearch" type="primary" icon="el-icon-search">搜索</el-button>
         <el-button @click="handCreate" v-hasPermission="'menu:add'" type="primary" icon="el-icon-plus">添加</el-button>
         <el-button type="primary" @click="handleRefresh" icon="el-icon-refresh">重置</el-button>
-        <el-button type="primary" @click="exportExcel" icon="el-icon-download">导出excal</el-button>
+        <el-button type="primary" v-hasPermission="'menu:export'" @click="ExportData" icon="el-icon-download">导出excal</el-button>
       </el-button-group>
     </el-form>
     <!-- table -->
@@ -270,13 +270,9 @@ export default {
         this.search.createTimeTo = this.formatTime(this.time[1])
       }
       this.search.listQuery = this.listQuery
-      console.log(this.search)
       fetchList(this.search).then(response => {
-        console.log(this.search)
-        console.log(response.data)
         this.content = response.data.rows.children
         this.total = response.data.total
-        // console.log(this.total)
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
@@ -428,23 +424,39 @@ export default {
       this.temp.icon = data
       console.log(this.temp.icon)
     },
-    exportExcel() {
-      this.listLoading = true
-      if (this.time === '') {
-        this.search.createTimeFrom = ''
-        this.search.createTimeTo = ''
-      } else {
-        this.search.createTimeFrom = this.formatTime(this.time[0])
-        this.search.createTimeTo = this.formatTime(this.time[1])
-      }
-      this.search.listQuery = this.listQuery
-      // console.log(this.search)
-      excelMenu(this.search).then(() => {
-        this.$notify({
-          title: '成功',
-          message: '导出成功',
-          type: 'success',
-          duration: 2000
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v =>
+        filterVal.map(j => {
+          return v[j]
+        })
+      )
+    },
+    ExportData() {
+      import('@/vendor/Export2Excel').then(excel => {
+        this.listLoading = true
+        if (this.time === '') {
+          this.search.createTimeFrom = ''
+          this.search.createTimeTo = ''
+        } else {
+          this.search.createTimeFrom = this.formatTime(this.time[0])
+          this.search.createTimeTo = this.formatTime(this.time[1])
+        }
+        this.search.listQuery = this.listQuery
+        excelMenu(this.search).then(response => {
+          // console.log(response)
+          const tHeader = ['名称', '图标', '类型', '地址', 'VUE组件', '权限', '创建时间', '修改时间']
+          // 与表头相对应的数据里边的字段
+          const filterVal = ['menuName', 'icon', 'type', 'path', 'component', 'perms', 'createTime', 'modifyTime']
+          const list = response.data
+          const data = this.formatJson(filterVal, list)
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: '菜单列表'
+          })
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 1000)
         })
       })
     }

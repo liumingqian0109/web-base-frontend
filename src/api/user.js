@@ -37,7 +37,7 @@ export function deleteUser(data) {
 export function exportUser(data) {
   return request({
     url: '/user/excel',
-    method: 'post',
+    method: 'get',
     data
   })
 }

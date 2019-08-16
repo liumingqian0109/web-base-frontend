@@ -27,3 +27,10 @@ export function deleteDepartment(data) {
     method: 'delete'
   })
 }
+export function excelDepartment(data) {
+  return request({
+    url: 'dept/excel',
+    method: 'get',
+    data
+  })
+}
