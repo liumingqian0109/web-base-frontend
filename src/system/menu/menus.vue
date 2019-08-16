@@ -123,6 +123,7 @@ import { fetchList, updateMenu, createMenu, treeList, deleteMenu, excelMenu } fr
 // table tree
 import treeTable from '@/components/TreeTable'
 import Pagination from '@/components/Pagination'
+import { parseTime2 } from '@/utils'
 import waves from '@/directive/waves' // Waves directive
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -432,6 +433,7 @@ export default {
       )
     },
     ExportData() {
+      var time = new Date()
       import('@/vendor/Export2Excel').then(excel => {
         this.listLoading = true
         if (this.time === '') {
@@ -452,7 +454,7 @@ export default {
           excel.export_json_to_excel({
             header: tHeader,
             data,
-            filename: '菜单列表'
+            filename: '菜单列表' + parseTime2(time)
           })
           setTimeout(() => {
             this.listLoading = false

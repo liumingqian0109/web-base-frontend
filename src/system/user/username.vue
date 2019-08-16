@@ -196,7 +196,7 @@
 <script>
 import { fetchList, createUser, updateUser, deleteUser } from '@/api/user'
 import waves from '@/directive/waves' // Waves directive
-import { parseTime } from '@/utils'
+import { parseTime, parseTime2 } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -473,6 +473,7 @@ export default {
       })
     },
     ExportData() {
+      const time = new Date()
       import('@/vendor/Export2Excel').then(excel => {
         // 表格的表头列表
         this.listLoading = true
@@ -507,7 +508,7 @@ export default {
           excel.export_json_to_excel({
             header: tHeader,
             data,
-            filename: '用户管理'
+            filename: '用户管理' + parseTime2(time)
           })
           setTimeout(() => {
             this.listLoading = false

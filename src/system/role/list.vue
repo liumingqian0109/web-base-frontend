@@ -147,7 +147,7 @@
 <script>
 import { fetchList, treeList, createRole, updateRole, updateTree, deleteRole } from '@/api/role'
 import waves from '@/directive/waves' // Waves directive
-import { parseTime } from '@/utils'
+import { parseTime2 } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 // import { generateTitle } from '@/utils/i18n'
 
@@ -420,11 +420,7 @@ export default {
     formatJson(filterVal, jsonData) {
       return jsonData.map(v =>
         filterVal.map(j => {
-          if (j === 'timestamp') {
-            return parseTime(v[j])
-          } else {
-            return v[j]
-          }
+          return v[j]
         })
       )
     },
@@ -438,6 +434,7 @@ export default {
       console.log(ids)
     },
     ExportData() {
+      const time = new Date()
       import('@/vendor/Export2Excel').then(excel => {
         // 表格的表头列表
         this.listLoading = true
@@ -470,7 +467,7 @@ export default {
           excel.export_json_to_excel({
             header: tHeader,
             data,
-            filename: '角色列表'
+            filename: '角色列表' + parseTime2(time)
           })
           setTimeout(() => {
             this.listLoading = false

@@ -81,6 +81,7 @@
 </template>
 <script>
 import { fetchList, deleteLog } from '@/api/log'
+import { parseTime2 } from '@/utils'
 export default {
   data() {
     return {
@@ -169,6 +170,7 @@ export default {
       })
     },
     ExportData() {
+      const timeName = new Date()
       import('@/vendor/Export2Excel').then(excel => {
         // 表格的表头列表
         this.listLoading = true
@@ -193,7 +195,7 @@ export default {
           excel.export_json_to_excel({
             header: tHeader,
             data,
-            filename: '日志管理'
+            filename: '日志管理' + parseTime2(timeName)
           })
           setTimeout(() => {
             this.listLoading = false
