@@ -77,12 +77,21 @@
         </template>
       </el-table-column>
     </el-table>
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="pageNum"
+      :limit.sync="pageSize"
+      @pagination="getList"
+    />
   </div>
 </template>
 <script>
 import { fetchList, deleteLog } from '@/api/log'
 import { parseTime2 } from '@/utils'
+import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 export default {
+  components: { Pagination },
   data() {
     return {
       search: {
@@ -92,11 +101,8 @@ export default {
       list: '',
       listLoading: true, // 加载动画
       // 分页
-      listQuery: {
-        page: 1,
-        limit: 20,
-        sort: '+id'
-      },
+      pageNum: 1,
+      pageList: 20,
       total: 0,
       tableKey: 0
     }
@@ -117,7 +123,8 @@ export default {
     },
     getList() {
       this.listLoading = true
-      this.listQuery = this.search.listQuery
+      this.search.pageNum = this.pageNum
+      this.search.pageList = this.pageList
       if (this.search.time === '') {
         this.search.createTimeFrom = ''
         this.search.createTimeTo = ''
@@ -146,7 +153,7 @@ export default {
       }
     },
     handleRefresh() {
-      this.listQuery.page = 1
+      this.pageNum = 1
       this.getList()
       this.date = ''
       this.user = ''
@@ -174,7 +181,8 @@ export default {
       import('@/vendor/Export2Excel').then(excel => {
         // 表格的表头列表
         this.listLoading = true
-        this.listQuery = this.search.listQuery
+        this.search.pageNum = this.pageNum
+        this.search.pageList = this.pageList
         if (this.search.time === '') {
           this.search.createTimeFrom = ''
           this.search.createTimeTo = ''

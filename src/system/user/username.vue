@@ -114,8 +114,8 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
+      :page.sync="pageNum"
+      :limit.sync="pageSize"
       @pagination="getList"
     />
     <!-- 添加编辑窗口 -->
@@ -269,10 +269,8 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
-      listQuery: {
-        page: 1,
-        limit: 20
-      },
+      pageNum: 1,
+      pageSize: 20,
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
       sortOptions: [
@@ -374,7 +372,8 @@ export default {
       this.listLoading = true
       const deptId = this.search.department
       const username = this.search.userName
-      const listQuery = this.listQuery
+      const pageNum = this.pageNum
+      const pageSize = this.pageSize
       var createTimeFrom
       var createTimeTo
       var data
@@ -390,7 +389,8 @@ export default {
         createTimeTo,
         deptId,
         username,
-        listQuery
+        pageNum,
+        pageSize
       }
       fetchList(data).then(response => {
         this.list = response.data.rows

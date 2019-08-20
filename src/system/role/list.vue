@@ -86,8 +86,8 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
+      :page.sync="pageNum"
+      :limit.sync="pageSize"
       @pagination="getList"
     />
 
@@ -192,11 +192,8 @@ export default {
       listLoading: true, // 加载动画
       treeKey: [],
       // 分页
-      listQuery: {
-        page: 1,
-        limit: 20,
-        sort: '+id'
-      },
+      pageNum: 1,
+      pageList: 20,
       // 树形菜单
       props: {
         label: 'title',
@@ -270,7 +267,8 @@ export default {
       this.listLoading = true
       // const deptId = this.search.department
       const roleName = this.userName
-      const listQuery = this.listQuery
+      const pageList = this.pageList
+      const pageNum = this.pageNum
       var createTimeFrom
       var createTimeTo
       if (this.time === '') {
@@ -284,7 +282,8 @@ export default {
         createTimeFrom,
         createTimeTo,
         roleName,
-        listQuery
+        pageList,
+        pageNum
       }
       fetchList(data).then(response => {
         console.log(response.data)

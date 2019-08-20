@@ -64,13 +64,6 @@
         >{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
-      @pagination="getList"
-    />
   </div>
 </template>
 <script>
@@ -133,11 +126,7 @@ export default {
       },
       content: Array,
       total: 0,
-      listLoading: true,
-      listQuery: {
-        page: 1,
-        limit: 20
-      }
+      listLoading: true
     }
   },
   created() {
@@ -198,7 +187,6 @@ export default {
         this.search.createTimeFrom = this.formatTime(this.time[0])
         this.search.createTimeTo = this.formatTime(this.time[1])
       }
-      this.search.listQuery = this.listQuery
       console.log(this.search)
       fetchList(this.search).then(response => {
         // console.log(response.data.rows.children)

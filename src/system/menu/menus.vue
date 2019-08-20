@@ -91,13 +91,6 @@
         <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
       </span>
     </el-dialog>
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
-      @pagination="getList"
-    />
     <el-dialog
       class='IconDialog'
       title="选择菜单图标"
@@ -199,10 +192,6 @@ export default {
       total: 0,
       listLoading: true,
       calendarTypeOptions,
-      listQuery: {
-        page: 1,
-        limit: 20
-      },
       props: {
         label: 'title',
         children: 'children'
@@ -270,7 +259,6 @@ export default {
         this.search.createTimeFrom = this.formatTime(this.time[0])
         this.search.createTimeTo = this.formatTime(this.time[1])
       }
-      this.search.listQuery = this.listQuery
       fetchList(this.search).then(response => {
         this.content = response.data.rows.children
         this.total = response.data.total
