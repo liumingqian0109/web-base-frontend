@@ -132,9 +132,6 @@
         <el-form-item :label="$t('system.username')" prop="username">
           <el-input v-model="temp.username" class="filter-item" placeholder="请填写用户名"></el-input>
         </el-form-item>
-        <el-form-item :label="$t('system.password')" prop="password">
-          <el-input show-password v-model="temp.password" class="filter-item" placeholder="请填写密码"></el-input>
-        </el-form-item>
         <el-form-item :label="$t('system.roleId')" prop="roleId">
           <el-select v-model="temp.roleId" class="filter-item" placeholder="请选择级别">
             <el-option
@@ -173,6 +170,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="resetPassword">重置密码</el-button>
         <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
         <el-button
           type="primary"
@@ -322,10 +320,6 @@ export default {
           { required: true, message: '请输入用户名称', trigger: 'blur' },
           { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
         ],
-        password: [
-          { required: true, message: '请输入用户密码', trigger: 'blur' },
-          { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
-        ],
         roleId: [
           { required: true, message: '请选择级别', trigger: 'change' }
         ],
@@ -455,11 +449,15 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
+    resetPassword() {
+      this.temp.password = '111111'
+    },
     updateData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateUser(tempData).then(response => {
+            console.log(tempData)
             this.dialogFormVisible = false
             this.success(response.data)
           })
