@@ -6,19 +6,11 @@ export function loginByUsername(username, password) {
     password
   }
   return request({
-    // url: '/login/login',
     url: '/login',
     method: 'post',
-    // data
     params: data
   })
 }
-//   return request({
-//     url: '/login/login',
-//     method: 'post',
-//     data
-//   })
-// }
 export function logout(data) {
   return request({
     url: '/logout/' + data,
@@ -29,15 +21,17 @@ export function logout(data) {
 export function getUserInfo(username) {
   const data = {
     username
-    // token
   }
-  // export function getUserInfo(data) {
-  // const data = {
-  //   token
-  // }
   return request({
     url: 'login/user-info',
     method: 'get',
+    params: data
+  })
+}
+export function changePassword(data) {
+  return request({
+    url: 'user/password',
+    method: 'put',
     params: data
   })
 }

@@ -58,7 +58,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="change">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -73,6 +73,8 @@ import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
 import LangSelect from '@/components/LangSelect'
 import ThemePicker from '@/components/ThemePicker'
+import { changePassword } from '@/api/login'
+import store from '@/store'
 
 export default {
   data() {
@@ -107,6 +109,43 @@ export default {
       this.$store.dispatch('LogOut').then(() => {
         location.reload()// In order to re-instantiate the vue-router object to avoid bugs
       })
+    },
+    change() {
+      const password = this.password
+      const username = store.getters.name
+      var data = {
+        password,
+        username
+      }
+      if (this.password === this.passwordAgain) {
+        changePassword(data).then(response => {
+          const res = response.data
+          if (res.retureCode === 0) {
+            this.$notify({
+              title: '成功',
+              message: res.message,
+              type: 'success',
+              duration: 2000
+            })
+            this.dialogVisible = false
+            this.getList()
+          } else {
+            this.$notify({
+              title: '失败',
+              message: res.message,
+              type: 'error',
+              duration: 2000
+            })
+          }
+        })
+      } else {
+        this.$notify({
+          title: '失败',
+          message: '两次密码输入不同,请重新输入',
+          type: 'error',
+          duration: 2000
+        })
+      }
     }
   }
 }

@@ -85,6 +85,7 @@ export default {
       },
       time: '',
       tree: '',
+      modifyTime: '',
       dialogFormVisible: false,
       dialogStatus: '',
       updateTime: '',
@@ -266,6 +267,7 @@ export default {
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       const treeKey = []
+      this.modifyTime = this.temp.modifyTime
       treeKey.push(this.temp.parentId)
       // console.log(this.treeKey)
       this.$nextTick(() => {
@@ -284,7 +286,8 @@ export default {
             deptName: this.temp.title,
             orderNum: this.temp.order,
             parentId: menuId[0],
-            deptId: this.temp.id
+            deptId: this.temp.id,
+            modifyTime: this.modifyTime
           }
           const tempData = Object.assign({}, this.temp)
           // tempData.updateTime = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
