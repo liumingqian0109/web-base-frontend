@@ -467,7 +467,7 @@ export default {
     handleModifyStatus(row, status) {
       const data = row.userId
       deleteUser(data).then(response => {
-        this.success(response)
+        this.success(response.data)
       })
     },
     ExportData() {
